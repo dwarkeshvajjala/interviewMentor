@@ -1,3 +1,5 @@
+import React from 'react';
+
 export function LoadingState({ children = 'Loading...' }) {
   return (
     <div className="state-card">
