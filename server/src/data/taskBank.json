@@ -1,0 +1,187 @@
+{
+  "csharp": {
+    "code": [
+      { "title": "Frequency count with Dictionary", "detail": "Count word frequency in a sentence using a Dictionary<string,int>.", "minutes": 35 },
+      { "title": "Second largest in array", "detail": "Find the second largest number without sorting the whole array.", "minutes": 35 },
+      { "title": "Merge two sorted arrays", "detail": "Merge two sorted int[] into one sorted array.", "minutes": 40 },
+      { "title": "LINQ on employees", "detail": "Given a List<Employee>: Where active, Select names, GroupBy department, FirstOrDefault by id.", "minutes": 40 },
+      { "title": "Async with HttpClient", "detail": "Call a public API with HttpClient, await the response, deserialize JSON.", "minutes": 40 },
+      { "title": "HRMS OOP model", "detail": "Model Employee, Manager, LeaveRequest, IApprovalService, LeaveApprovalService.", "minutes": 45 }
+    ],
+    "learn": [
+      { "title": "IEnumerable vs IQueryable", "detail": "Deferred execution and when LINQ runs in memory vs in the database.", "minutes": 30, "resource": "https://learn.microsoft.com/en-us/dotnet/csharp/" },
+      { "title": "Value vs reference types", "detail": "Stack vs heap, boxing/unboxing.", "minutes": 30, "resource": "https://learn.microsoft.com/en-us/dotnet/csharp/" },
+      { "title": "async/await truth", "detail": "Why async does not create a thread, and why .Result can deadlock.", "minutes": 30, "resource": "https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/" },
+      { "title": "Garbage collection & IDisposable", "detail": "How GC works at a high level, and the using pattern.", "minutes": 30, "resource": "https://learn.microsoft.com/en-us/dotnet/csharp/" }
+    ]
+  },
+  "dotnet": {
+    "code": [
+      { "title": "Employee API — CRUD", "detail": "GET/GET{id}/POST/PUT/DELETE for employees with DTOs and a service layer.", "minutes": 45, "resource": "https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-web-api" },
+      { "title": "Add leave-request endpoints", "detail": "POST /leave-requests and POST /leave-requests/{id}/approve.", "minutes": 45 },
+      { "title": "Global exception middleware", "detail": "Add middleware that catches exceptions and returns a clean error response.", "minutes": 35 },
+      { "title": "EF Core + AsNoTracking", "detail": "Add DbContext, a migration, seed data, and a read query using AsNoTracking and projection to DTO.", "minutes": 45, "resource": "https://learn.microsoft.com/en-us/ef/core/" }
+    ],
+    "learn": [
+      { "title": "Request pipeline & middleware", "detail": "Order of middleware, what runs per request.", "minutes": 30, "resource": "https://learn.microsoft.com/en-us/aspnet/core/" },
+      { "title": "DI lifetimes", "detail": "Transient vs scoped vs singleton, and a bug each can cause.", "minutes": 30, "resource": "https://learn.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection" },
+      { "title": "REST + PUT vs PATCH", "detail": "Idempotency, status codes, full vs partial update.", "minutes": 30 },
+      { "title": "JWT auth flow", "detail": "Login, token issue, validation, claims, refresh.", "minutes": 30 }
+    ]
+  },
+  "sql": {
+    "code": [
+      { "title": "CTE + ROW_NUMBER", "detail": "Top 3 salaries per department using ROW_NUMBER() OVER (PARTITION BY ...).", "minutes": 40 },
+      { "title": "Subqueries vs joins", "detail": "Rewrite a correlated subquery as a join and compare.", "minutes": 35 },
+      { "title": "Aggregation set", "detail": "Leave count by employee, total hours by month, departments with > 10 employees.", "minutes": 35 },
+      { "title": "LeetCode SQL 50 — 3 problems", "detail": "Solve 3 from the Top SQL 50 set. Write the why, not just the answer.", "minutes": 45, "resource": "https://leetcode.com/studyplan/top-sql-50/" }
+    ],
+    "learn": [
+      { "title": "Indexes: seek vs scan", "detail": "Clustered vs non-clustered vs covering index; when a scan happens.", "minutes": 30, "resource": "https://learn.microsoft.com/en-us/sql/relational-databases/sql-server-index-design-guide" },
+      { "title": "Execution plans", "detail": "Read a plan, spot the expensive operator.", "minutes": 30, "resource": "https://learn.microsoft.com/en-us/sql/relational-databases/performance/execution-plans" },
+      { "title": "Deadlocks & isolation", "detail": "What causes a deadlock and how isolation levels relate.", "minutes": 30 },
+      { "title": "Window functions", "detail": "ROW_NUMBER vs RANK vs DENSE_RANK, PARTITION BY.", "minutes": 30 }
+    ]
+  },
+  "dsa": {
+    "code": [
+      { "title": "Two Sum", "detail": "Brute force, then the dictionary O(n) version. Explain out loud.", "minutes": 35, "resource": "https://neetcode.io/roadmap" },
+      { "title": "Valid Anagram", "detail": "Frequency-count approach.", "minutes": 30 },
+      { "title": "Valid Parentheses", "detail": "Stack approach.", "minutes": 30 },
+      { "title": "Binary Search", "detail": "Clean iterative version, handle edges.", "minutes": 30 },
+      { "title": "Longest Substring Without Repeating Characters", "detail": "Sliding window.", "minutes": 40 },
+      { "title": "Reverse Linked List", "detail": "Iterative pointer reversal.", "minutes": 35 },
+      { "title": "Group Anagrams", "detail": "Hashmap of sorted-key buckets.", "minutes": 40 }
+    ],
+    "learn": [
+      { "title": "Two pointers pattern", "detail": "When and why it beats nested loops.", "minutes": 25, "resource": "https://neetcode.io/roadmap" },
+      { "title": "Sliding window pattern", "detail": "Fixed vs variable window.", "minutes": 25 },
+      { "title": "Hashmap pattern", "detail": "Trade space for time; common shapes.", "minutes": 25 }
+    ]
+  },
+  "javascript": {
+    "code": [
+      { "title": "Debounce a search input", "detail": "Write a debounce function and apply it to a fake search.", "minutes": 40 },
+      { "title": "Promise chain + async rewrite", "detail": "Chain 3 promises, then rewrite with async/await + try/catch.", "minutes": 35 },
+      { "title": "Group + summarise data", "detail": "From an array of objects, group by a key and compute totals.", "minutes": 35 },
+      { "title": "Fetch + render list", "detail": "Fetch JSON, handle loading/error, render to the DOM.", "minutes": 40 }
+    ],
+    "learn": [
+      { "title": "Closures", "detail": "What a closure is and one real use.", "minutes": 25, "resource": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures-v8/" },
+      { "title": "Event loop", "detail": "Call stack, task queue, microtasks.", "minutes": 30 },
+      { "title": "this in JS", "detail": "How this changes with call/apply/bind and arrow functions.", "minutes": 25 }
+    ]
+  },
+  "typescript": {
+    "code": [
+      { "title": "Type the Employee model", "detail": "interface Employee + getActiveEmployees(employees: Employee[]): Employee[].", "minutes": 35 },
+      { "title": "Generics basics", "detail": "Write a generic function and a generic wrapper type.", "minutes": 35 },
+      { "title": "Union + narrowing", "detail": "Model a union type and narrow it safely.", "minutes": 30 }
+    ],
+    "learn": [
+      { "title": "type vs interface", "detail": "When to use each.", "minutes": 25, "resource": "https://exercism.org/tracks/typescript" },
+      { "title": "How TS helps React/Angular", "detail": "Props typing, safer refactors.", "minutes": 25 }
+    ]
+  },
+  "react": {
+    "code": [
+      { "title": "Login form", "detail": "email, password, validation, submit handler, loading state, error message.", "minutes": 45, "resource": "https://react.dev/learn" },
+      { "title": "Users list + search", "detail": "List users from an API, add a search/filter box.", "minutes": 45 },
+      { "title": "Add/Edit user form", "detail": "Controlled inputs, validation, call your .NET API.", "minutes": 45 }
+    ],
+    "learn": [
+      { "title": "useEffect dependency array", "detail": "Why deps matter and common mistakes.", "minutes": 25, "resource": "https://react.dev/learn" },
+      { "title": "Controlled vs uncontrolled", "detail": "And why keys matter in lists.", "minutes": 25 },
+      { "title": "When you actually need Context/Redux", "detail": "Prop drilling vs shared state.", "minutes": 25 }
+    ]
+  },
+  "angular": {
+    "code": [
+      { "title": "Reactive login form", "detail": "FormGroup, validators, submit.", "minutes": 45, "resource": "https://angular.dev/tutorials" },
+      { "title": "Users list from API", "detail": "Service + HttpClient + component.", "minutes": 45 },
+      { "title": "HTTP interceptor", "detail": "Add a token header via an interceptor.", "minutes": 40 }
+    ],
+    "learn": [
+      { "title": "Observable vs Promise", "detail": "Streams vs single value; unsubscribe.", "minutes": 25, "resource": "https://angular.dev/tutorials" },
+      { "title": "Services & DI", "detail": "Providing and injecting a service.", "minutes": 25 },
+      { "title": "Reactive vs template forms", "detail": "When to use each.", "minutes": 25 }
+    ]
+  },
+  "azure": {
+    "code": [
+      { "title": "Write the App Service answer", "detail": "Draft your 'why App Service' answer: managed hosting, slots, scaling, DevOps.", "minutes": 30 },
+      { "title": "Key Vault + managed identity note", "detail": "Explain how App Service reads secrets from Key Vault without storing them.", "minutes": 30 },
+      { "title": "Azure Functions story", "detail": "Write the HRMS approval-automation Functions story with trigger details.", "minutes": 35 }
+    ],
+    "learn": [
+      { "title": "AZ-204 service map", "detail": "App Service, Functions, Key Vault, Blob, Azure SQL — one line each.", "minutes": 30, "resource": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-204" },
+      { "title": "Entra ID / OAuth basics", "detail": "AuthN vs AuthZ, OAuth2, OIDC, JWT, app registration.", "minutes": 30 },
+      { "title": "Azure DevOps pipeline", "detail": "Build, release, YAML, environments, approvals.", "minutes": 30 }
+    ]
+  },
+  "ai": {
+    "code": [
+      { "title": "AI report endpoint (mock)", "detail": "Design IAiReportService with AzureOpenAiReportService and MockAiReportService. Wire a mock that returns a markdown report.", "minutes": 45 },
+      { "title": "Prompt + guardrails draft", "detail": "Write the system prompt and guardrails for the wellness coaching feature.", "minutes": 30 }
+    ],
+    "learn": [
+      { "title": "Azure OpenAI vs OpenAI", "detail": "Enterprise controls, deployment names, governance.", "minutes": 30, "resource": "https://learn.microsoft.com/en-us/azure/ai-services/openai/" },
+      { "title": "Tokens, context, streaming, cost", "detail": "How to control cost and latency; data privacy.", "minutes": 30 },
+      { "title": "Frontend vs backend AI calls", "detail": "Why keys live on the backend; error handling and retries.", "minutes": 25 }
+    ]
+  },
+  "systemdesign": {
+    "code": [
+      { "title": "Design: HRMS leave approval", "detail": "Requirements, users, APIs, tables, architecture, auth, scaling. Write it, then record a 5-min explanation.", "minutes": 45 },
+      { "title": "Design: healthcare scan upload/review", "detail": "Same 8-step template. Focus on secure file storage.", "minutes": 45 },
+      { "title": "Design: notification service", "detail": "Queue, retries, idempotency, logging.", "minutes": 45 }
+    ],
+    "learn": [
+      { "title": "Design answer template", "detail": "Memorise the 8 steps: requirements → users → APIs → data → architecture → security → scale → tradeoffs.", "minutes": 25 },
+      { "title": "Monolith vs microservice tradeoffs", "detail": "When each is the right call for your scale.", "minutes": 25 }
+    ]
+  },
+  "resume": {
+    "code": [
+      { "title": "Resume defense drill — 1 bullet", "detail": "Pick one resume bullet. Fill: what I did / tools / problem / result / interview proof. If you cannot, rewrite the claim safer.", "minutes": 30 },
+      { "title": "Write 40% SQL story details", "detail": "Which query, which index, how you found the deadlock, what tool, before/after numbers.", "minutes": 35 },
+      { "title": "Pin a GitHub repo + README", "detail": "Add a real README to your Employee API or AI report repo.", "minutes": 40 }
+    ],
+    "learn": [
+      { "title": "Fix resume/portfolio mismatch", "detail": "Align dates and version claims across resume, portfolio, LinkedIn.", "minutes": 30 },
+      { "title": "Positioning statement", "detail": "Refine your 'full-stack .NET, backend-strong, AI-curious' one-liner.", "minutes": 25 }
+    ]
+  },
+  "speaking": {
+    "speak": [
+      { "title": "Tell me about yourself", "detail": "Record 75 seconds. Lead with strengths, end with what you want next.", "minutes": 15 },
+      { "title": "Why are you looking for change?", "detail": "Record 60 seconds. Pull toward product engineering, not away from the bench.", "minutes": 15 },
+      { "title": "Explain one project (STAR)", "detail": "Pick HRMS / Healthcare / Postal / Wellness. Situation, task, action, result.", "minutes": 15 },
+      { "title": "Explain today's technical topic", "detail": "Definition, example, tradeoff, resume link. Under 90 seconds.", "minutes": 15 },
+      { "title": "What if you do not know an answer?", "detail": "Practice the honest pattern: 'I have not done that directly, but my understanding is...'", "minutes": 15 }
+    ]
+  },
+  "review": {
+    "learn": [
+      { "title": "Weekly review", "detail": "What did I complete? What felt hard? What did I avoid? What question would expose me? Next week's one focus.", "minutes": 30 },
+      { "title": "Rewrite a weak solution", "detail": "Redo one thing that felt shaky this week, from memory.", "minutes": 30 }
+    ],
+    "speak": [
+      { "title": "Re-record your weakest answer", "detail": "Pick the answer that felt worst this week and record a cleaner version.", "minutes": 15 }
+    ]
+  },
+  "mock": {
+    "code": [
+      { "title": "Coding mock (timed)", "detail": "One DSA easy/medium in 25 min. Narrate as you go. Then write what tripped you.", "minutes": 45 },
+      { "title": "SQL mock", "detail": "3 queries under time pressure, explain each plan.", "minutes": 40 },
+      { "title": ".NET rapid-fire", "detail": "Answer 10 core .NET questions out loud without notes.", "minutes": 35 }
+    ],
+    "learn": [
+      { "title": "Log mock feedback", "detail": "Top 3 weak topics from today's mock. Schedule the fix within 48h.", "minutes": 20 }
+    ],
+    "speak": [
+      { "title": "Behavioral mock", "detail": "Conflict, failure, proudest project. STAR, natural delivery.", "minutes": 15 },
+      { "title": "Project defense mock", "detail": "Defend your hardest resume claim against follow-ups.", "minutes": 15 }
+    ]
+  }
+}

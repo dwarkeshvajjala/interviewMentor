@@ -1,0 +1,160 @@
+{
+  "meta": {
+    "title": "Bench to Product Company — .NET Full-Stack Comeback",
+    "owner": "Dwarkesh",
+    "totalDays": 90,
+    "weekdayMaxMinutes": 120,
+    "note": "Days 1-14 are explicit rehabilitation days. Day 15 onward is generated from phases + weekday focus + the task bank. The roadmap is the spine; AI only adapts within the current phase."
+  },
+
+  "consistencyRules": [
+    "Never Zero: do at least one tiny thing every day. 10 minutes counts.",
+    "Two-Day Rule: missing one day is rest. Never miss two in a row.",
+    "No-Guilt Reset: missed tasks are not debt. You do not carry yesterday into today.",
+    "A low-energy day kept the chain alive. That is a win, not a failure."
+  ],
+
+  "modes": {
+    "full":   { "label": "Full day",   "minutes": 120, "split": { "code": 45, "learn": 45, "speak": 20, "track": 10 } },
+    "normal": { "label": "Normal day", "minutes": 90,  "split": { "code": 35, "learn": 35, "speak": 15, "track": 5 } },
+    "low":    { "label": "Low energy", "minutes": 20,  "split": { "code": 0,  "learn": 15, "speak": 5,  "track": 0 } }
+  },
+
+  "weekdayFocus": {
+    "0": { "name": "Review & recovery", "topics": ["review", "speaking"] },
+    "1": { "name": "C# + one DSA",       "topics": ["csharp", "dsa"] },
+    "2": { "name": "SQL",                "topics": ["sql"] },
+    "3": { "name": ".NET API",           "topics": ["dotnet"] },
+    "4": { "name": "Frontend",           "topics": ["javascript", "typescript", "react", "angular"] },
+    "5": { "name": "Azure / AI / Resume","topics": ["azure", "ai", "resume"] },
+    "6": { "name": "Deep work + mock",   "topics": ["dotnet", "systemdesign", "mock"] }
+  },
+
+  "phases": [
+    { "startDay": 15, "endDay": 21,  "week": 3,  "name": ".NET Core & Web API",        "focus": "Become employable in core .NET interviews. Build the Employee API.", "topics": ["dotnet", "csharp", "speaking"] },
+    { "startDay": 22, "endDay": 28,  "week": 4,  "name": "SQL Depth & Project Defense", "focus": "Stop fearing SQL writing. Defend every resume project.",              "topics": ["sql", "resume", "speaking"] },
+    { "startDay": 29, "endDay": 35,  "week": 5,  "name": "JavaScript & TypeScript",     "focus": "Be believable as full-stack.",                                        "topics": ["javascript", "typescript", "speaking"] },
+    { "startDay": 36, "endDay": 42,  "week": 6,  "name": "React Practical",             "focus": "Handle real frontend interview basics. Build an admin users page.",    "topics": ["react", "javascript", "speaking"] },
+    { "startDay": 43, "endDay": 49,  "week": 7,  "name": "Angular Practical",           "focus": "Cover the framework you claim, strongly enough.",                     "topics": ["angular", "typescript", "speaking"] },
+    { "startDay": 50, "endDay": 56,  "week": 8,  "name": "Azure & AI Integration",      "focus": "Make your differentiator real and explainable.",                      "topics": ["azure", "ai", "speaking"] },
+    { "startDay": 57, "endDay": 63,  "week": 9,  "name": "System Design",               "focus": "Structure answers like a mid-level engineer.",                        "topics": ["systemdesign", "dotnet", "speaking"] },
+    { "startDay": 64, "endDay": 70,  "week": 10, "name": "Mock Interview Sprint",       "focus": "Pressure practice. Coding, SQL, .NET, behavioral, project defense.",  "topics": ["mock", "dsa", "speaking"] },
+    { "startDay": 71, "endDay": 77,  "week": 11, "name": "Resume / Portfolio / GitHub", "focus": "Remove avoidable rejection reasons. Align resume, portfolio, GitHub.","topics": ["resume", "dotnet", "speaking"] },
+    { "startDay": 78, "endDay": 90,  "week": 12, "name": "Applications & Real Interviews","focus": "Apply without panic. Every interview becomes practice data.",       "topics": ["mock", "resume", "speaking"] }
+  ],
+
+  "explicitDays": [
+    {
+      "day": 1, "title": "C# Program Structure", "defaultMode": "normal",
+      "tasks": [
+        { "kind": "code",  "title": "Hello World + variables + array", "detail": "Write Hello World, print your name, create int/string/bool/double variables, an array of 5 numbers, print it with for AND foreach.", "minutes": 35, "resource": "https://learn.microsoft.com/en-us/dotnet/csharp/" },
+        { "kind": "learn", "title": "What Main does in C#", "detail": "Read the C# program structure page. Write 5 bullet notes on Main, namespaces, and entry point.", "minutes": 35, "resource": "https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/program-structure/" },
+        { "kind": "speak", "title": "Explain Main out loud", "detail": "Record 60 seconds: what Main is and why every C# program needs an entry point.", "minutes": 15, "resource": "" }
+      ]
+    },
+    {
+      "day": 2, "title": "Functions and Conditions", "defaultMode": "normal",
+      "tasks": [
+        { "kind": "code",  "title": "Write 4 small methods", "detail": "Add(int a,int b), IsEven(int n), GetMax(int[] numbers), CountPositiveNumbers(int[] numbers). Type them, do not copy.", "minutes": 40, "resource": "https://exercism.org/tracks/csharp" },
+        { "kind": "learn", "title": "Parameters & return types", "detail": "Note the difference between parameters, arguments, return types, and void.", "minutes": 30, "resource": "https://learn.microsoft.com/en-us/dotnet/csharp/" },
+        { "kind": "speak", "title": "Explain method parameters", "detail": "Record 60 seconds explaining parameters and return type with one example.", "minutes": 15, "resource": "" }
+      ]
+    },
+    {
+      "day": 3, "title": "Arrays and Strings", "defaultMode": "normal",
+      "tasks": [
+        { "kind": "code",  "title": "5 array/string drills", "detail": "Sum array, reverse array, reverse string, count vowels, check palindrome.", "minutes": 40, "resource": "https://exercism.org/tracks/csharp" },
+        { "kind": "learn", "title": "String immutability", "detail": "Why strings are immutable in C#, and what string indexing means. 5 notes.", "minutes": 30, "resource": "https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/strings/" },
+        { "kind": "speak", "title": "Explain string immutability", "detail": "Record 60 seconds on array indexing and why strings are immutable.", "minutes": 15, "resource": "" }
+      ]
+    },
+    {
+      "day": 4, "title": "List and Dictionary", "defaultMode": "normal",
+      "tasks": [
+        { "kind": "code",  "title": "List + Dictionary drills", "detail": "Create List<string> of names, add/remove, build a word-frequency Dictionary, count each character in a string.", "minutes": 40, "resource": "https://learn.microsoft.com/en-us/dotnet/csharp/" },
+        { "kind": "learn", "title": "List vs Array; Dictionary uses", "detail": "When to use a List vs an Array, and a real Dictionary use case. 5 notes.", "minutes": 30, "resource": "" },
+        { "kind": "speak", "title": "Explain List vs Array", "detail": "Record 60 seconds: List vs Array and one Dictionary use case.", "minutes": 15, "resource": "" }
+      ]
+    },
+    {
+      "day": 5, "title": "Classes and Objects", "defaultMode": "normal",
+      "tasks": [
+        { "kind": "code",  "title": "Employee class", "detail": "Create Employee class with Id, Name, Department, Salary. Make 3 employees. Print only active ones.", "minutes": 40, "resource": "" },
+        { "kind": "learn", "title": "Class vs object", "detail": "Difference between a class (blueprint) and an object (instance). Properties vs fields. 5 notes.", "minutes": 30, "resource": "https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/object-oriented/" },
+        { "kind": "speak", "title": "Explain class vs object", "detail": "Record 60 seconds with the blueprint analogy.", "minutes": 15, "resource": "" }
+      ]
+    },
+    {
+      "day": 6, "title": "OOP Basics", "defaultMode": "normal",
+      "tasks": [
+        { "kind": "code",  "title": "Inheritance + interface", "detail": "Person base class, Employee derived class, IWork interface, implement DoWork().", "minutes": 40, "resource": "https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/object-oriented/" },
+        { "kind": "learn", "title": "Inheritance vs interface", "detail": "When to use inheritance vs an interface. Abstract class vs interface. 5 notes.", "minutes": 30, "resource": "" },
+        { "kind": "speak", "title": "Explain inheritance & interface", "detail": "Record 90 seconds with a real example.", "minutes": 15, "resource": "" }
+      ]
+    },
+    {
+      "day": 7, "title": "Week 1 Review", "defaultMode": "normal",
+      "tasks": [
+        { "kind": "code",  "title": "Rewrite days 1-6 from memory", "detail": "No looking. Then redo the 2 exercises you struggled with most.", "minutes": 45, "resource": "" },
+        { "kind": "learn", "title": "Gap notes", "detail": "Write down the 3 things that felt hardest this week. These become next week's focus.", "minutes": 20, "resource": "" },
+        { "kind": "speak", "title": "Tell me about yourself", "detail": "Record TMAY (75 sec) and 'what did I work on this week'. Save both as baseline.", "minutes": 20, "resource": "" }
+      ]
+    },
+    {
+      "day": 8, "title": "SQL Basics", "defaultMode": "normal",
+      "tasks": [
+        { "kind": "code",  "title": "5 SELECT queries", "detail": "On Employees/Departments/LeaveRequests: SELECT all, active only, ORDER BY salary, TOP 5 salaries, WHERE department = 'IT'.", "minutes": 40, "resource": "https://learn.microsoft.com/en-us/training/paths/get-started-querying-with-transact-sql/" },
+        { "kind": "learn", "title": "SELECT / WHERE / ORDER BY", "detail": "Refresh clause order and what each does. 5 notes.", "minutes": 30, "resource": "https://learn.microsoft.com/en-us/training/paths/get-started-querying-with-transact-sql/" },
+        { "kind": "speak", "title": "Explain SELECT/WHERE/ORDER BY", "detail": "Record 60 seconds.", "minutes": 15, "resource": "" }
+      ]
+    },
+    {
+      "day": 9, "title": "SQL Joins", "defaultMode": "normal",
+      "tasks": [
+        { "kind": "code",  "title": "4 join queries", "detail": "Employees with department name, all employees even with no department, departments with employee count, employees who never applied for leave.", "minutes": 40, "resource": "" },
+        { "kind": "learn", "title": "INNER vs LEFT JOIN", "detail": "Visualise the difference. When rows drop vs stay. 5 notes.", "minutes": 30, "resource": "" },
+        { "kind": "speak", "title": "Explain INNER vs LEFT JOIN", "detail": "Record 60 seconds with an example.", "minutes": 15, "resource": "" }
+      ]
+    },
+    {
+      "day": 10, "title": "SQL Grouping", "defaultMode": "normal",
+      "tasks": [
+        { "kind": "code",  "title": "4 grouping queries", "detail": "Count employees by department, average salary by department, departments having > 5 employees, monthly leave count.", "minutes": 40, "resource": "" },
+        { "kind": "learn", "title": "GROUP BY & HAVING", "detail": "Difference between WHERE and HAVING. 5 notes.", "minutes": 30, "resource": "" },
+        { "kind": "speak", "title": "Explain GROUP BY & HAVING", "detail": "Record 60 seconds.", "minutes": 15, "resource": "" }
+      ]
+    },
+    {
+      "day": 11, "title": "JavaScript Basics", "defaultMode": "normal",
+      "tasks": [
+        { "kind": "code",  "title": "JS array-method drills", "detail": "Filter active users, map to names, sum salaries with reduce, group by department manually.", "minutes": 40, "resource": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures-v8/" },
+        { "kind": "learn", "title": "let / const / array methods", "detail": "let vs const, and map/filter/reduce. 5 notes.", "minutes": 30, "resource": "https://exercism.org/tracks/javascript" },
+        { "kind": "speak", "title": "Explain let/const & array methods", "detail": "Record 60 seconds.", "minutes": 15, "resource": "" }
+      ]
+    },
+    {
+      "day": 12, "title": "Async JavaScript", "defaultMode": "normal",
+      "tasks": [
+        { "kind": "code",  "title": "Promise + async/await + fetch", "detail": "Create a Promise, use async/await, fetch a sample API, handle errors with try/catch.", "minutes": 40, "resource": "" },
+        { "kind": "learn", "title": "Promise vs async/await", "detail": "What async/await is doing under the hood. 5 notes.", "minutes": 30, "resource": "" },
+        { "kind": "speak", "title": "Explain Promise vs async/await", "detail": "Record 60 seconds.", "minutes": 15, "resource": "" }
+      ]
+    },
+    {
+      "day": 13, "title": "Mini API Planning", "defaultMode": "normal",
+      "tasks": [
+        { "kind": "code",  "title": "Design the Employee API", "detail": "Write endpoints, tables, DTOs, service methods, validation rules in a notes file. No heavy coding.", "minutes": 35, "resource": "https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-web-api" },
+        { "kind": "learn", "title": "REST design basics", "detail": "Resources, verbs, status codes, PUT vs PATCH. 5 notes.", "minutes": 30, "resource": "https://learn.microsoft.com/en-us/aspnet/core/" },
+        { "kind": "speak", "title": "Explain your API design", "detail": "Record 3 minutes walking through the design.", "minutes": 15, "resource": "" }
+      ]
+    },
+    {
+      "day": 14, "title": "First Mock Day", "defaultMode": "full",
+      "tasks": [
+        { "kind": "code",  "title": "Self mock — coding", "detail": "Without notes: explain Main, reverse a string, write one SQL join. Time yourself.", "minutes": 45, "resource": "" },
+        { "kind": "learn", "title": "Review the mock", "detail": "What was unclear? Where did you pause? Which topic felt embarrassing? Write next week's first fix.", "minutes": 30, "resource": "" },
+        { "kind": "speak", "title": "Full mock answer set", "detail": "Record: TMAY, explain HRMS project, 'what if you do not know an answer'. Listen once, note ONE fix.", "minutes": 20, "resource": "" }
+      ]
+    }
+  ]
+}
