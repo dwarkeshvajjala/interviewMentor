@@ -52,10 +52,10 @@ cp .env.example .env
 ```
 Edit `server/.env`:
 - either `DATABASE_URL` (Supabase Postgres connection string) or `SUPABASE_URL` + `SUPABASE_SERVICE_KEY` (from step 1)
-- `GROQ_API_KEY` — get a free key at console.groq.com → API Keys
-- `GROQ_MODEL` — pick a current chat model from console.groq.com/docs/models
-- `APP_PASSCODE` — make up a private string (your light gate)
-- `PLAN_START_DATE` — day 1 of your plan (default `2026-06-17`)
+- `GROQ_API_KEY` - get a free key at console.groq.com -> API Keys
+- `GROQ_MODEL` - pick a current chat model from console.groq.com/docs/models
+- `APP_PASSCODE` - make up a private string (your light gate)
+- `PLAN_START_DATE` - day 1 of your plan (default `2026-06-17`)
 
 Run it:
 ```bash
@@ -69,7 +69,7 @@ npm install
 cp .env.example .env
 ```
 Edit `client/.env`:
-- `VITE_API_URL=http://localhost:4000`
+- `VITE_API_URL=http://127.0.0.1:4000`
 - `VITE_APP_PASSCODE=` the same passcode you set in the backend
 
 Run it:

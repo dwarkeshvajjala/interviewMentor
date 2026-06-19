@@ -53,5 +53,5 @@ app.listen(PORT, () => {
   console.log(`Interview Mentor API running on http://localhost:${PORT}`);
   if (!hasSupabaseConfig) console.log('  ! Set DATABASE_URL, or SUPABASE_URL / SUPABASE_SERVICE_KEY, in server/.env');
   if (!process.env.GROQ_API_KEY) console.log('  ! Set GROQ_API_KEY in server/.env for AI features');
-  if (!process.env.APP_PASSCODE) console.log('  ! APP_PASSCODE is empty — API is open. Set one before deploying.');
+  if (!process.env.APP_PASSCODE) console.log('  ! APP_PASSCODE is empty - API is open. Set one before deploying.');
 });

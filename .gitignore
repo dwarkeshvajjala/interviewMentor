@@ -12,3 +12,4 @@ dist/
 # logs / os
 *.log
 .DS_Store
+app-check.png
