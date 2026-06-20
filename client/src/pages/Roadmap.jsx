@@ -2,6 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { ErrorState, LoadingState } from '../components/States.jsx';
 
+const kickoffWeeks = [
+  {
+    week: 1,
+    days: 'Day 1-7',
+    title: 'Programming restart',
+    focus: 'C# program structure, methods, arrays, strings, collections, OOP basics, and one review day.'
+  },
+  {
+    week: 2,
+    days: 'Day 8-14',
+    title: 'Basics, SQL & first mock',
+    focus: 'SQL SELECT/JOIN/GROUP BY, JavaScript basics, async JavaScript, API planning, and the first mock day.'
+  }
+];
+
 export default function Roadmap() {
   const [data, setData] = useState(null);
   const [err, setErr] = useState('');
@@ -22,13 +37,27 @@ export default function Roadmap() {
     <div className="fade-in">
       <h2 className="section-title">The 90-day spine</h2>
 
-      <div className="card" style={{ marginBottom: 14 }}>
-        <div className="eyebrow">Days 1-14</div>
-        <p className="muted" style={{ marginTop: 6 }}>Rehabilitation. Restart your hands and your voice - C# basics, SQL basics, JS basics, first mock. Do not judge yourself in these two weeks.</p>
+      <div className="roadmap-intro">
+        <div>
+          <div className="eyebrow">First 14 days</div>
+          <h3>Rebuild rhythm before intensity</h3>
+          <p className="muted">The first two weeks are deliberately simple: restart your hands, rebuild speaking comfort, and avoid making missed days feel like debt.</p>
+        </div>
+        <span className="pill">rehab phase</span>
       </div>
 
+      {kickoffWeeks.map(w => (
+        <div key={w.week} className="list-item roadmap-week">
+          <div>
+            <span className="pill">{w.days}</span>
+            <b>Week {w.week} - {w.title}</b>
+          </div>
+          <p className="muted">{w.focus}</p>
+        </div>
+      ))}
+
       {data.phases.map(p => (
-        <div key={p.week} className="list-item">
+        <div key={p.week} className="list-item roadmap-week">
           <div className="row" style={{ justifyContent: 'space-between' }}>
             <b style={{ fontFamily: 'var(--display)' }}>Week {p.week} - {p.name}</b>
             <span className="pill">Day {p.startDay}-{p.endDay}</span>

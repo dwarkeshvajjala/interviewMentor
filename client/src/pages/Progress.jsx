@@ -82,7 +82,7 @@ export default function Progress() {
       <ErrorState
         title="Progress needs the database"
         message={err}
-        hint="Progress is calculated from your database days, tasks, questions, and applications."
+        hint="Progress is calculated from your database days, tasks, and question bank."
         onRetry={load}
       />
     );
@@ -123,12 +123,6 @@ export default function Progress() {
         <p className="muted" style={{ margin: 0 }}>Weekly target: 8 points minimum, 12 good, 16+ excellent. Full day = 3, normal = 2, low = 1. Uneven days are fine. Disappearing for many days is the only real failure.</p>
       </div>
 
-      <div className="card" style={{ marginTop: 14 }}>
-        <div className="row" style={{ justifyContent: 'space-between' }}>
-          <span className="muted">Applications in flight</span>
-          <b style={{ fontFamily: 'var(--display)', fontSize: 18 }}>{p.applications}</b>
-        </div>
-      </div>
     </div>
   );
 }

@@ -3,7 +3,6 @@ import { NavLink, Routes, Route } from 'react-router-dom';
 import Today from './pages/Today.jsx';
 import Roadmap from './pages/Roadmap.jsx';
 import Questions from './pages/Questions.jsx';
-import Applications from './pages/Applications.jsx';
 import Speaking from './pages/Speaking.jsx';
 import Progress from './pages/Progress.jsx';
 import { api } from './api.js';
@@ -12,7 +11,6 @@ const tabs = [
   ['/', 'Today'],
   ['/roadmap', 'Roadmap'],
   ['/questions', 'Questions'],
-  ['/applications', 'Applications'],
   ['/speaking', 'Speaking'],
   ['/progress', 'Progress']
 ];
@@ -80,7 +78,6 @@ export default function App() {
         <Route path="/" element={<Today />} />
         <Route path="/roadmap" element={<Roadmap />} />
         <Route path="/questions" element={<Questions />} />
-        <Route path="/applications" element={<Applications />} />
         <Route path="/speaking" element={<Speaking />} />
         <Route path="/progress" element={<Progress />} />
       </Routes>
