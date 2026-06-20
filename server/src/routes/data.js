@@ -76,7 +76,9 @@ router.get('/progress', requireSupabase, async (req, res) => {
         const date = formatDate(cur);
         const day = byDate.get(date);
         const p = scoreDay(day);
-        const status = day?.status || (date === today ? 'pending' : 'missed');
+        const status = day?.status === 'pending' && date < today
+          ? 'missed'
+          : (day?.status || (date === today ? 'pending' : 'missed'));
         total += p;
         series.push({ date, points: p, mode: day?.mode || 'missed', status });
       }
