@@ -25,7 +25,7 @@ async function notion(path, method = 'POST', body) {
 
 async function findDailyPage(db, theDate) {
   const result = await notion(`databases/${db}/query`, 'POST', {
-    filter: { property: 'When', date: { equals: theDate } },
+    filter: { property: 'Date', date: { equals: theDate } },
     page_size: 1
   });
   if (result.error || result.skipped) return result;
