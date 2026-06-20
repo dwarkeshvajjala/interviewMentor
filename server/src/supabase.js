@@ -23,3 +23,25 @@ export function requireSupabase(req, res, next) {
     error: 'Database is not configured yet. Create server/.env from server/.env.example, then set DATABASE_URL or SUPABASE_URL and SUPABASE_SERVICE_KEY.'
   });
 }
+
+export async function checkDatabaseHealth() {
+  if (!hasSupabaseConfig) {
+    return { configured: false, reachable: false, error: 'Database is not configured.' };
+  }
+
+  try {
+    if (databaseUrl) {
+      await supabase.query('select 1 as ok');
+    } else {
+      const { error } = await supabase.from('days').select('id', { count: 'exact', head: true }).limit(1);
+      if (error) throw error;
+    }
+    return { configured: true, reachable: true };
+  } catch (e) {
+    return {
+      configured: true,
+      reachable: false,
+      error: String(e.message || e)
+    };
+  }
+}

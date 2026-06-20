@@ -26,7 +26,10 @@ function SetupStatus() {
       .then((health) => {
         if (!active) return;
         if (!health.config?.database) {
-          setState({ status: 'warn', message: 'Database setup needed: add DATABASE_URL or Supabase service credentials in server/.env.' });
+          const message = health.config?.databaseConfigured
+            ? `Database configured but not reachable: ${health.config.databaseError || 'check Supabase credentials.'}`
+            : 'Database setup needed: add DATABASE_URL or Supabase service credentials in server/.env.';
+          setState({ status: 'warn', message });
           return;
         }
         if (!health.config?.ai) {

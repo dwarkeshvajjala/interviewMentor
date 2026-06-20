@@ -6,7 +6,7 @@ import todayRoutes from './routes/today.js';
 import aiRoutes from './routes/ai.js';
 import dataRoutes from './routes/data.js';
 import { roadmapMeta } from './planner.js';
-import { hasSupabaseConfig } from './supabase.js';
+import { checkDatabaseHealth, hasSupabaseConfig } from './supabase.js';
 
 const app = express();
 app.use(express.json({ limit: '1mb' }));
@@ -34,15 +34,20 @@ app.use((req, res, next) => {
   return res.status(401).json({ error: 'Unauthorized' });
 });
 
-app.get('/api/health', (req, res) => res.json({
-  ok: true,
-  plan: roadmapMeta.title,
-  config: {
-    database: hasSupabaseConfig,
-    ai: Boolean(process.env.GROQ_API_KEY),
-    passcode: Boolean(process.env.APP_PASSCODE)
-  }
-}));
+app.get('/api/health', async (req, res) => {
+  const database = await checkDatabaseHealth();
+  res.json({
+    ok: true,
+    plan: roadmapMeta.title,
+    config: {
+      database: database.reachable,
+      databaseConfigured: database.configured,
+      databaseError: database.error || null,
+      ai: Boolean(process.env.GROQ_API_KEY),
+      passcode: Boolean(process.env.APP_PASSCODE)
+    }
+  });
+});
 
 app.use('/api', todayRoutes);
 app.use('/api/ai', aiRoutes);
