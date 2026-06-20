@@ -37,19 +37,49 @@ const rich  = (t) => ({ rich_text: [{ text: { content: String(t || '').slice(0, 
 const num   = (n) => (n == null ? { number: null } : { number: Number(n) });
 const date  = (d) => (d ? { date: { start: d } } : { date: null });
 const select = (s) => (s ? { select: { name: String(s).slice(0, 90) } } : { select: null });
+const checkbox = (v) => ({ checkbox: Boolean(v) });
+
+function modeName(mode) {
+  return ({ full: 'Full', normal: 'Normal', low: 'Survival' }[mode] || mode);
+}
+
+function questionTopic(topic) {
+  return topic === 'Project' ? 'Project Defense' : topic;
+}
+
+function applicationSource(source) {
+  return source === 'Career page' ? 'Company Site' : source;
+}
+
+function applicationStatus(status) {
+  return ({
+    Screen: 'Recruiter Call',
+    Tech: 'Tech Round',
+    Final: 'HR Round'
+  }[status] || status);
+}
+
+function applicationLocation(location) {
+  if (!location) return null;
+  const text = String(location);
+  const known = ['Bangalore', 'Pune', 'Remote', 'Ahmedabad'];
+  return known.find(city => text.toLowerCase().includes(city.toLowerCase())) || 'Other';
+}
 
 // Push one day's summary into the Daily Tracker DB.
 export async function syncDailyLog({ the_date, mode, status, energy, mood, summary }) {
   const db = process.env.NOTION_DAILY_DB_ID;
   if (!db) return { skipped: true, reason: 'NOTION_DAILY_DB_ID not set' };
   const properties = {
-    Date: { ...title(the_date) },
-    When: date(the_date),
-    Mode: select(mode),
-    Status: select(status),
+    Day: { ...title(the_date) },
+    Date: date(the_date),
+    Mode: select(status === 'skipped' ? 'Zero' : modeName(mode)),
     Energy: num(energy),
     Mood: num(mood),
-    Summary: rich(summary)
+    Notes: rich(`${status || 'pending'} - ${summary || ''}`.trim()),
+    'Coding Done': checkbox(status === 'done'),
+    'Topic Done': checkbox(status === 'done'),
+    'Speaking Done': checkbox(status === 'done')
   };
   const existing = await findDailyPage(db, the_date);
   if (existing.error || existing.skipped) return existing;
@@ -66,10 +96,12 @@ export async function syncQuestion(q) {
     parent: { database_id: db },
     properties: {
       Question: { ...title(q.question) },
-      Topic: select(q.topic),
+      Topic: select(questionTopic(q.topic)),
       Difficulty: select(q.difficulty),
       Status: select(q.status),
-      Answer: rich(q.my_answer)
+      'My Answer': rich(q.my_answer),
+      Mistake: rich(q.mistake),
+      'Last Practiced': date(q.last_practiced)
     }
   });
 }
@@ -82,10 +114,15 @@ export async function syncApplication(a) {
     properties: {
       Company: { ...title(a.company) },
       Role: rich(a.role),
-      Location: rich(a.location),
-      Source: select(a.source),
-      Status: select(a.status),
-      Applied: date(a.applied_date)
+      Location: select(applicationLocation(a.location)),
+      Source: select(applicationSource(a.source)),
+      Status: select(applicationStatus(a.status)),
+      Stack: rich(a.stack),
+      Recruiter: rich(a.recruiter),
+      'Interview Date': date(a.interview_date),
+      'Questions Asked': rich(a.questions_asked),
+      Result: rich(a.result),
+      'Applied Date': date(a.applied_date)
     }
   });
 }
