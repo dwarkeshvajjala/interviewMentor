@@ -23,6 +23,15 @@ async function notion(path, method = 'POST', body) {
   }
 }
 
+async function findDailyPage(db, theDate) {
+  const result = await notion(`databases/${db}/query`, 'POST', {
+    filter: { property: 'When', date: { equals: theDate } },
+    page_size: 1
+  });
+  if (result.error || result.skipped) return result;
+  return { pageId: result.data?.results?.[0]?.id || null };
+}
+
 const title = (t) => ({ title: [{ text: { content: String(t || '').slice(0, 1900) } }] });
 const rich  = (t) => ({ rich_text: [{ text: { content: String(t || '').slice(0, 1900) } }] });
 const num   = (n) => (n == null ? { number: null } : { number: Number(n) });
@@ -33,18 +42,21 @@ const select = (s) => (s ? { select: { name: String(s).slice(0, 90) } } : { sele
 export async function syncDailyLog({ the_date, mode, status, energy, mood, summary }) {
   const db = process.env.NOTION_DAILY_DB_ID;
   if (!db) return { skipped: true, reason: 'NOTION_DAILY_DB_ID not set' };
-  return notion('pages', 'POST', {
-    parent: { database_id: db },
-    properties: {
-      Date: { ...title(the_date) },
-      When: date(the_date),
-      Mode: select(mode),
-      Status: select(status),
-      Energy: num(energy),
-      Mood: num(mood),
-      Summary: rich(summary)
-    }
-  });
+  const properties = {
+    Date: { ...title(the_date) },
+    When: date(the_date),
+    Mode: select(mode),
+    Status: select(status),
+    Energy: num(energy),
+    Mood: num(mood),
+    Summary: rich(summary)
+  };
+  const existing = await findDailyPage(db, the_date);
+  if (existing.error || existing.skipped) return existing;
+  if (existing.pageId) {
+    return notion(`pages/${existing.pageId}`, 'PATCH', { properties });
+  }
+  return notion('pages', 'POST', { parent: { database_id: db }, properties });
 }
 
 export async function syncQuestion(q) {

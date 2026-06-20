@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { EmptyState, ErrorState, LoadingState } from '../components/States.jsx';
+import { useSpeechInput } from '../useSpeechInput.js';
 
 const PROMPTS = ['Tell me about yourself', 'Why are you looking for change?', 'Explain a project (STAR)', 'Explain a technical concept', 'What if you do not know?'];
 
@@ -8,9 +9,13 @@ export default function Speaking() {
   const [items, setItems] = useState([]);
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ prompt: PROMPTS[0], duration_s: 75, clarity: 3, pace: 3, confidence: 3, one_fix: '' });
+  const [form, setForm] = useState({ prompt: PROMPTS[0], duration_s: 75, clarity: 3, pace: 3, confidence: 3, transcript: '', one_fix: '' });
   const [mock, setMock] = useState(null);
   const [mockBusy, setMockBusy] = useState(false);
+  const appendTranscript = useCallback((text) => {
+    setForm(prev => ({ ...prev, transcript: `${prev.transcript}${prev.transcript ? ' ' : ''}${text}` }));
+  }, []);
+  const speech = useSpeechInput(appendTranscript);
 
   async function load() {
     try {
@@ -27,7 +32,7 @@ export default function Speaking() {
   useEffect(() => { load(); }, []);
 
   async function add() {
-    try { await api.create('recordings', form); setForm({ ...form, one_fix: '' }); load(); } catch (e) { setErr(e.message); }
+    try { await api.create('recordings', form); setForm({ ...form, transcript: '', one_fix: '' }); load(); } catch (e) { setErr(e.message); }
   }
   async function runMock() {
     setMockBusy(true); setMock(null);
@@ -82,6 +87,17 @@ export default function Speaking() {
         <Scale k="clarity" label="Clarity" />
         <Scale k="pace" label="Pace" />
         <Scale k="confidence" label="Confidence" />
+        <textarea
+          placeholder="Transcript or rough notes from your answer..."
+          value={form.transcript}
+          onChange={e => setForm({ ...form, transcript: e.target.value })}
+          style={{ marginTop: 8 }}
+        />
+        {speech.supported && (
+          <button className={`btn sm ghost ${speech.listening ? 'listening' : ''}`} onClick={speech.toggle} style={{ marginTop: 8 }}>
+            {speech.listening ? 'Stop dictation' : 'Dictate answer'}
+          </button>
+        )}
         <input placeholder="One fix for next time" value={form.one_fix} onChange={e => setForm({ ...form, one_fix: e.target.value })} style={{ marginTop: 6 }} />
         <div className="row" style={{ marginTop: 10 }}><button className="btn primary" onClick={add}>Log it</button></div>
       </div>
@@ -95,6 +111,7 @@ export default function Speaking() {
             <span className="faint">{new Date(r.created_at).toLocaleDateString()}</span>
           </div>
           <div className="faint" style={{ marginTop: 4 }}>clarity {r.clarity} - pace {r.pace} - confidence {r.confidence}</div>
+          {r.transcript && <div className="muted" style={{ marginTop: 4 }}>{r.transcript}</div>}
           {r.one_fix && <div className="muted" style={{ marginTop: 4 }}>Fix: {r.one_fix}</div>}
         </div>
       ))}

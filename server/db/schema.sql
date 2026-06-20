@@ -96,9 +96,12 @@ create table if not exists recordings (
   clarity     int,                              -- 1..5
   pace        int,                              -- 1..5
   confidence  int,                              -- 1..5
+  transcript  text,
   one_fix     text,
   created_at  timestamptz not null default now()
 );
+
+alter table recordings add column if not exists transcript text;
 
 create index if not exists idx_tasks_day  on tasks(day_id);
 create index if not exists idx_days_date  on days(the_date);

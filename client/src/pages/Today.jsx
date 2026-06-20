@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { ErrorState, InlineNotice, LoadingState } from '../components/States.jsx';
+import { useSpeechInput } from '../useSpeechInput.js';
 
 const MODES = [['full', 'Full - 2h'], ['normal', 'Normal - 90m'], ['low', 'Low - 20m']];
 
@@ -37,6 +38,10 @@ export default function Today() {
   const [noteTopic, setNoteTopic] = useState('');
   const [feedback, setFeedback] = useState(null);
   const [noteBusy, setNoteBusy] = useState(false);
+  const appendDictation = useCallback((text) => {
+    setNote(prev => `${prev}${prev ? ' ' : ''}${text}`);
+  }, []);
+  const speech = useSpeechInput(appendDictation);
 
   async function load() {
     try {
@@ -227,6 +232,11 @@ export default function Today() {
             <textarea placeholder="Type or paste here..." value={note} onChange={e => setNote(e.target.value)} />
             <div className="row" style={{ marginTop: 10 }}>
               <button className="btn primary" onClick={sendNote} disabled={noteBusy || !note.trim()}>{noteBusy ? 'Saving...' : 'Get feedback'}</button>
+              {speech.supported && (
+                <button className={`btn ghost ${speech.listening ? 'listening' : ''}`} onClick={speech.toggle}>
+                  {speech.listening ? 'Stop dictation' : 'Dictate note'}
+                </button>
+              )}
             </div>
             {feedback && (
               <div className="ai-box">

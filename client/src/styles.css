@@ -82,7 +82,12 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 /* ---------- nav ---------- */
-nav.tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 22px; }
+nav.tabs {
+  display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 22px;
+  position: sticky; top: 0; z-index: 5;
+  padding: 8px 0;
+  background: linear-gradient(180deg, var(--bg) 70%, rgba(14,17,22,0));
+}
 nav.tabs a {
   text-decoration: none; color: var(--muted);
   font-size: 13.5px; font-weight: 500;
@@ -201,6 +206,7 @@ h1.day-title { font-family: var(--display); font-size: 26px; font-weight: 700; l
 .btn.primary { background: var(--amber); border-color: var(--amber); color: #1a130a; font-weight: 600; }
 .btn.primary:hover { filter: brightness(1.06); }
 .btn.ghost { background: transparent; }
+.btn.listening { border-color: var(--amber); color: var(--amber); }
 .btn.sage { background: var(--sage); border-color: var(--sage); color: #0e1a0a; font-weight: 600; }
 .btn:disabled { opacity: 0.5; cursor: default; }
 .btn.sm { padding: 6px 11px; font-size: 12.5px; }
@@ -277,10 +283,71 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
 .bar.full { background: var(--amber); }
 .bar.normal { background: var(--sage); }
 .bar.low { background: var(--sage-dim); }
+.bar.rest { background: transparent; border: 1px dashed var(--faint); }
+.bar.missed { background: rgba(107,116,128,0.22); }
 .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 .stat { border: 1px solid var(--border-soft); border-radius: var(--radius-sm); padding: 14px; background: var(--surface); }
 .stat .n { font-family: var(--display); font-size: 28px; font-weight: 700; }
 .stat .k { color: var(--faint); font-size: 12.5px; }
+
+.calendar-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.calendar-weekdays,
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+.calendar-weekdays {
+  color: var(--faint);
+  font-size: 11.5px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.calendar-day {
+  aspect-ratio: 1;
+  min-height: 34px;
+  border: 1px solid var(--border-soft);
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  background: var(--bg-2);
+  font-size: 12px;
+}
+.calendar-day.full { color: #1a130a; background: var(--amber); border-color: var(--amber); }
+.calendar-day.normal { color: #0e1a0a; background: var(--sage); border-color: var(--sage); }
+.calendar-day.low { color: var(--sage); background: var(--sage-dim); border-color: var(--sage); }
+.calendar-day.rest { color: var(--faint); background: transparent; border-style: dashed; }
+.calendar-day.pending { color: var(--amber); border-color: var(--amber-dim); background: rgba(230,165,82,0.06); }
+.calendar-day.missed { color: var(--faint); background: rgba(107,116,128,0.12); }
+.calendar-day.blank { visibility: hidden; }
+.legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  color: var(--faint);
+  font-size: 12px;
+}
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  display: inline-block;
+}
+.swatch.full { background: var(--amber); border-color: var(--amber); }
+.swatch.normal { background: var(--sage); border-color: var(--sage); }
+.swatch.low { background: var(--sage-dim); border-color: var(--sage); }
+.swatch.rest { border-color: var(--faint); border-style: dashed; }
+.swatch.missed { background: rgba(107,116,128,0.22); }
 
 /* ---------- misc ---------- */
 .section-title { font-family: var(--display); font-size: 20px; font-weight: 600; margin: 0 0 14px; letter-spacing: -0.01em; }
@@ -295,6 +362,12 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
 @media (max-width: 520px) {
   h1.day-title { font-size: 23px; }
   .stat-grid { grid-template-columns: 1fr; }
+  .brand { align-items: center; }
+  .brand span:last-child { display: none; }
+  nav.tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 10px; }
+  nav.tabs a { white-space: nowrap; }
+  .today-summary { grid-template-columns: 1fr; }
+  .calendar-day { min-height: 30px; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }

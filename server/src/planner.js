@@ -9,6 +9,7 @@ const bank = JSON.parse(readFileSync(join(__dirname, 'data', 'taskBank.json'), '
 
 const START = process.env.PLAN_START_DATE || '2026-06-17';
 const TZ = process.env.TIMEZONE || 'Asia/Kolkata';
+export const planStartDate = START;
 
 // --- date helpers (date-only, no time zone math beyond the day) ---
 export function todayDate() {
