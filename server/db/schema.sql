@@ -103,6 +103,12 @@ create table if not exists recordings (
 
 alter table recordings add column if not exists transcript text;
 
+-- ── 2026-06 additions ──────────────────────────────────────────────────────────
+-- Run these in Supabase SQL Editor if upgrading an existing database.
+alter table questions add column if not exists senior_answer  text;
+alter table questions add column if not exists confidence     text;  -- '⚠️ Weak' | '🤔 Medium' | '💪 Strong'
+alter table applications add column if not exists follow_up   text;  -- "next action" field, synced to Notion Follow-up
+
 create index if not exists idx_tasks_day  on tasks(day_id);
 create index if not exists idx_days_date  on days(the_date);
 create index if not exists idx_notes_date on notes(the_date);

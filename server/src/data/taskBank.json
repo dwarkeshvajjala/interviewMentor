@@ -161,13 +161,56 @@
       { "title": "What if you do not know an answer?", "detail": "Practice the honest pattern: 'I have not done that directly, but my understanding is...'", "minutes": 15 }
     ]
   },
+  "behavioral": {
+    "speak": [
+      { "title": "Performance improvement STAR", "detail": "Tell the healthcare SQL deadlock + 40% improvement story. Hit: situation, your specific task, exact actions (which query, which index, what tool), measurable result.", "minutes": 15 },
+      { "title": "Learning under pressure STAR", "detail": "Pick a time you had to learn Azure OpenAI or Claude API fast for a client. Walk through: deadline, how you self-taught, what you shipped.", "minutes": 15 },
+      { "title": "Conflict resolution STAR", "detail": "Describe a real disagreement with a colleague or a design decision. How did you handle it without burning the relationship?", "minutes": 15 },
+      { "title": "Ownership beyond scope STAR", "detail": "When did you fix or own something that wasn't technically your job? Why did you do it and what happened?", "minutes": 15 },
+      { "title": "Project pride story", "detail": "Tell the wellness SaaS admin panel or HRMS story as your proudest build. What was the business impact? What did you personally own?", "minutes": 15 },
+      { "title": "Failure / what went wrong STAR", "detail": "Pick a production bug or a missed deadline. What happened? What did you do? What would you do differently?", "minutes": 15 }
+    ],
+    "learn": [
+      { "title": "STAR framework drill", "detail": "For each of your 4 resume projects, fill this table: Situation / Task / Action (3 specific steps) / Result (number or outcome). If you can't fill Result, the story isn't ready.", "minutes": 30 },
+      { "title": "Red flag handling scripts", "detail": "Prepare calm answers for: 'I see you were on bench' / 'Why are resume and portfolio dates mismatched?' / 'What do you mean by AI-powered?' Write and read each one out loud.", "minutes": 25 }
+    ]
+  },
+  "signalr": {
+    "code": [
+      { "title": "SignalR hub — basic implementation", "detail": "Write a minimal SignalR hub with a client-callable method and a server-push method. Understand OnConnectedAsync, OnDisconnectedAsync.", "minutes": 40, "resource": "https://learn.microsoft.com/en-us/aspnet/core/signalr/introduction" },
+      { "title": "SignalR wellness SaaS story", "detail": "Write out exactly how the live dashboard worked: Hub setup, groups or broadcast, what the client received, how often updates pushed. This is a live resume claim.", "minutes": 30 }
+    ],
+    "learn": [
+      { "title": "SignalR vs WebSocket vs polling", "detail": "When does SignalR fall back to long-polling? Why is it better than raw WebSockets for most cases? What are the scaling concerns (sticky sessions, Azure SignalR Service)?", "minutes": 30, "resource": "https://learn.microsoft.com/en-us/aspnet/core/signalr/introduction" }
+    ]
+  },
+  "designpatterns": {
+    "code": [
+      { "title": "Repository pattern", "detail": "Implement IEmployeeRepository and EmployeeRepository over EF Core. Understand why it decouples business logic from data access and makes testing easier.", "minutes": 40 },
+      { "title": "Factory + Strategy pattern", "detail": "Build IAiReportService with AzureOpenAiReportService and MockAiReportService. Wire it via DI and environment config — this is literally your resume project.", "minutes": 40 },
+      { "title": "CQRS basics (read/write split)", "detail": "Separate GetEmployees (query) from CreateEmployee (command). No framework needed — just show the pattern in plain C# classes.", "minutes": 35 }
+    ],
+    "learn": [
+      { "title": "Repository vs raw DbContext", "detail": "When does the extra abstraction pay off? When is it overkill? What does Unit of Work add?", "minutes": 25 },
+      { "title": "Common .NET interview patterns", "detail": "Explain: Singleton, Factory, Repository, Strategy, Decorator, Observer. One sentence + one .NET example each. These come up constantly.", "minutes": 30 }
+    ]
+  },
+  "efcore": {
+    "code": [
+      { "title": "Fix an N+1 problem", "detail": "Write a query that causes N+1 loads, then fix it with Include() and ThenInclude(). Explain why AsNoTracking() matters for read-only queries.", "minutes": 40, "resource": "https://learn.microsoft.com/en-us/ef/core/" },
+      { "title": "Migration + seed", "detail": "Create a migration, apply it, seed 5 employees via HasData. Then rollback and reapply. Get comfortable with the migration flow.", "minutes": 35 }
+    ],
+    "learn": [
+      { "title": "EF Core interview questions", "detail": "Be ready for: Tracking vs no-tracking / lazy vs eager loading / When to use raw SQL / DbContext lifetime / How migrations work. Write one answer for each.", "minutes": 30 }
+    ]
+  },
   "review": {
     "learn": [
-      { "title": "Weekly review", "detail": "What did I complete? What felt hard? What did I avoid? What question would expose me? Next week's one focus.", "minutes": 30 },
-      { "title": "Rewrite a weak solution", "detail": "Redo one thing that felt shaky this week, from memory.", "minutes": 30 }
+      { "title": "Weekly review", "detail": "What did I complete? What took extra energy? What would make next week smoother? Pick one focus.", "minutes": 30 },
+      { "title": "Rewrite one solution", "detail": "Redo one thing that felt unfinished this week, from memory.", "minutes": 30 }
     ],
     "speak": [
-      { "title": "Re-record your weakest answer", "detail": "Pick the answer that felt worst this week and record a cleaner version.", "minutes": 15 }
+      { "title": "Re-record one answer", "detail": "Pick one answer from this week and record a cleaner, calmer version.", "minutes": 15 }
     ]
   },
   "mock": {
@@ -177,10 +220,10 @@
       { "title": ".NET rapid-fire", "detail": "Answer 10 core .NET questions out loud without notes.", "minutes": 35 }
     ],
     "learn": [
-      { "title": "Log mock feedback", "detail": "Top 3 weak topics from today's mock. Schedule the fix within 48h.", "minutes": 20 }
+      { "title": "Log mock feedback", "detail": "Top 3 topics to polish from today's mock. Schedule the next pass within 48h.", "minutes": 20 }
     ],
     "speak": [
-      { "title": "Behavioral mock", "detail": "Conflict, failure, proudest project. STAR, natural delivery.", "minutes": 15 },
+      { "title": "Behavioral mock", "detail": "Conflict, learning moment, proudest project. STAR, natural delivery.", "minutes": 15 },
       { "title": "Project defense mock", "detail": "Defend your hardest resume claim against follow-ups.", "minutes": 15 }
     ]
   }

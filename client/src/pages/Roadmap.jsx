@@ -41,9 +41,9 @@ export default function Roadmap() {
         <div>
           <div className="eyebrow">First 14 days</div>
           <h3>Rebuild rhythm before intensity</h3>
-          <p className="muted">The first two weeks are deliberately simple: restart your hands, rebuild speaking comfort, and avoid making missed days feel like debt.</p>
+          <p className="muted">The first two weeks stay simple on purpose: get your hands moving again, rebuild speaking comfort, and keep each day easy to return to.</p>
         </div>
-        <span className="pill">rehab phase</span>
+        <span className="pill">restart phase</span>
       </div>
 
       {kickoffWeeks.map(w => (

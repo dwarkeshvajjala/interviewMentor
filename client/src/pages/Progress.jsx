@@ -140,13 +140,13 @@ export default function Progress() {
       </div>
 
       <div className="card" style={{ marginTop: 14 }}>
-        <p className="muted" style={{ margin: 0 }}>Weekly target: 8 points minimum, 12 good, 16+ excellent. Full day = 3, normal = 2, low = 1. Uneven days are fine. Disappearing for many days is the only real failure.</p>
+        <p className="muted" style={{ margin: 0 }}>Weekly target: 8 points minimum, 12 good, 16+ excellent. Full day = 3, normal = 2, low = 1. Uneven days are fine. The goal is to return quickly and keep the rhythm warm.</p>
       </div>
 
       <div className="card diary-review">
         <div className="label-row">
           <h3>Recent diary</h3>
-          <span className="faint">read this before judging yourself</span>
+          <span className="faint">small notes for the next step</span>
         </div>
         {reflectionLogs.length === 0 ? (
           <p className="muted" style={{ margin: 0 }}>No diary reflections yet. Add one on Today after your next sprint.</p>
@@ -157,8 +157,8 @@ export default function Progress() {
               <span>energy {log.energy || '-'} / mood {log.mood || '-'}</span>
             </div>
             <div>
-              {log.what_felt_hard && <p><span>Hard:</span> {log.what_felt_hard}</p>}
-              {log.what_avoided && <p><span>Next rep:</span> {log.what_avoided}</p>}
+              {log.what_felt_hard && <p><span>Energy:</span> {log.what_felt_hard}</p>}
+              {log.what_avoided && <p><span>Next step:</span> {log.what_avoided}</p>}
               {log.minutes_tomorrow && <p><span>Promise:</span> {log.minutes_tomorrow} minutes tomorrow</p>}
             </div>
           </div>

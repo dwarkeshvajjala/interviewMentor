@@ -2,22 +2,22 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { ErrorState, InlineNotice, LoadingState } from '../components/States.jsx';
 import { useSpeechInput } from '../useSpeechInput.js';
-import { getDailyCoachLine, getTimeGreeting } from '../motivation.js';
+import { getDailyCoachLine, getDailyEdge, getTimeGreeting } from '../motivation.js';
 
 const MODES = [['full', 'Full - 2h'], ['normal', 'Normal - 90m'], ['low', 'Low - 20m']];
 const DEFAULT_PACT = {
-  wish: 'Become interview-ready and build better money/options.',
-  outcome: 'Confidence, freedom, and proof that I can get out of this pit.',
-  obstacle: 'Evening scrolling, shame, porn urges, tiredness, and waiting to feel ready.',
-  plan: 'If I want to escape, then I open Mentor and do one 10-minute sprint first.',
-  friction: 'Phone away. No private tabs or random scrolling until the day is closed.',
-  reward: 'After the sprint: music, tea, short walk, or one guilt-free video.'
+  wish: 'Become interview-ready and open better career options.',
+  outcome: 'More confidence, better conversations, and a calmer path forward.',
+  obstacle: 'Evenings, tiredness, and waiting to feel fully ready.',
+  plan: 'If the day feels heavy, then I open Mentor and do one 10-minute sprint first.',
+  friction: 'Phone away until the first sprint is done.',
+  reward: 'After the sprint: music, tea, a short walk, or one relaxed break.'
 };
 
 function Chain({ series }) {
   const recent = (series || []).slice(-21);
   if (!recent.length) {
-    return <div className="chain-label">Your chain starts today. The only bad day is disappearing for many in a row.</div>;
+    return <div className="chain-label">Your chain starts with the next small close.</div>;
   }
   const alive = recent.filter(s => s.points > 0).length;
   return (
@@ -138,6 +138,20 @@ function FocusSprint({ date, mode }) {
   );
 }
 
+function DailyEdge() {
+  const edge = getDailyEdge();
+  return (
+    <div className="card edge-card">
+      <div className="label-row">
+        <h3>Today's edge</h3>
+        <span className="faint edge-origin">{edge.origin}</span>
+      </div>
+      <div className="edge-name">{edge.name}</div>
+      <p className="muted" style={{ margin: '6px 0 0', fontSize: 13.5 }}>{edge.tip}</p>
+    </div>
+  );
+}
+
 function loadPact() {
   const saved = localStorage.getItem('mentor-discipline-pact-v1');
   if (!saved) return DEFAULT_PACT;
@@ -174,9 +188,9 @@ function DisciplinePact({ date }) {
   return (
     <div className={`card pact-card ${locked ? 'locked' : ''}`}>
       <div className="label-row">
-        <h3>Discipline pact</h3>
+        <h3>Daily game plan</h3>
         <button className={`btn sm ${locked ? 'sage' : 'ghost'}`} onClick={lockToday}>
-          {locked ? 'Pact locked' : 'Lock today'}
+          {locked ? 'Plan locked' : 'Lock plan'}
         </button>
       </div>
       <div className="pact-grid">
@@ -189,7 +203,7 @@ function DisciplinePact({ date }) {
           <input value={pact.outcome} onChange={e => update('outcome', e.target.value)} />
         </label>
         <label className="field-block">
-          <span>Obstacle</span>
+          <span>Likely friction</span>
           <textarea value={pact.obstacle} onChange={e => update('obstacle', e.target.value)} />
         </label>
         <label className="field-block">
@@ -203,18 +217,18 @@ function DisciplinePact({ date }) {
           <input value={pact.friction} onChange={e => update('friction', e.target.value)} />
         </label>
         <label className="field-block">
-          <span>Clean reward</span>
+          <span>Small reward</span>
           <input value={pact.reward} onChange={e => update('reward', e.target.value)} />
         </label>
       </div>
       <p className="faint" style={{ margin: '10px 0 0' }}>
-        Rule: make discipline automatic before the urge starts arguing. No shame spiral, just the next rep.
+        Keep the plan easy to start: lower the size when needed, keep the promise.
       </p>
     </div>
   );
 }
 
-function UrgeReset() {
+function CalmReset() {
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [done, setDone] = useState(false);
 
@@ -238,25 +252,25 @@ function UrgeReset() {
   return (
     <div className={`card reset-card ${active ? 'active' : ''}`}>
       <div className="label-row">
-        <h3>Urge reset</h3>
-        <span className="faint">for scroll, porn, panic, avoidance</span>
+        <h3>90-second reset</h3>
+        <span className="faint">for noisy moments</span>
       </div>
       <div className="reset-layout">
         <div>
           <div className="reset-timer">{active ? formatSprint(secondsLeft) : '90s'}</div>
           <p className="muted" style={{ margin: '4px 0 0' }}>
-            {active ? 'Breathe slower than the urge. It can rise without becoming a command.' : 'When the escape urge hits, start here before deciding anything.'}
+            {active ? 'Breathe slowly. Let the moment pass, then choose the next small action.' : 'When your mind feels crowded, start here before deciding anything.'}
           </p>
         </div>
         <ol className="reset-steps">
-          <li>Name it: "this is an urge, not an order."</li>
+          <li>Name the moment: "I need a reset."</li>
           <li>Breathe: 4 seconds in, 6 seconds out.</li>
           <li>Move: 10 squats, pushups, or a one-minute walk.</li>
           <li>Open the first task and do a 10-minute sprint.</li>
         </ol>
       </div>
       <div className="row" style={{ marginTop: 12 }}>
-        <button className="btn primary" onClick={start}>{active ? 'Restart reset' : 'Start urge reset'}</button>
+        <button className="btn primary" onClick={start}>{active ? 'Restart reset' : 'Start reset'}</button>
         <button className="btn ghost" onClick={() => setSecondsLeft(0)}>I am back</button>
       </div>
     </div>
@@ -383,7 +397,7 @@ export default function Today() {
         what_avoided: avoidedThing,
         minutes_tomorrow: Number.isFinite(minutes) ? minutes : null
       });
-      setDiaryMsg('Diary saved. This is your receipt for showing up.');
+      setDiaryMsg('Saved. Tomorrow has a clearer starting point.');
     } catch (e) {
       setErr(`Could not save diary: ${e.message}`);
       console.warn('[today] diary save failed', e);
@@ -492,7 +506,9 @@ export default function Today() {
 
           <DisciplinePact date={day.the_date} />
 
-          <UrgeReset />
+          <DailyEdge />
+
+          <CalmReset />
 
           <FocusSprint date={day.the_date} mode={day.mode} />
 
@@ -548,21 +564,21 @@ export default function Today() {
           <div className="card diary-card">
             <div className="label-row">
               <h3>Daily diary</h3>
-              <span className="faint">private, honest, useful</span>
+              <span className="faint">private notes for tomorrow</span>
             </div>
             <div className="diary-grid">
               <label className="field-block">
-                <span>What felt hard today?</span>
+                <span>What took the most energy today?</span>
                 <textarea
-                  placeholder="Example: I avoided SQL joins because I felt slow..."
+                  placeholder="Example: SQL joins took more focus than expected..."
                   value={hardThing}
                   onChange={e => setHardThing(e.target.value)}
                 />
               </label>
               <label className="field-block">
-                <span>What did I avoid, and what is the smallest next rep?</span>
+                <span>What would make tomorrow easier?</span>
                 <textarea
-                  placeholder="Example: I avoided speaking. Tomorrow I will record 60 seconds."
+                  placeholder="Example: Start with a 60-second spoken answer before tasks."
                   value={avoidedThing}
                   onChange={e => setAvoidedThing(e.target.value)}
                 />
@@ -585,7 +601,7 @@ export default function Today() {
               </button>
             </div>
             {diaryMsg && <div className="toast">{diaryMsg}</div>}
-            <p className="faint" style={{ marginTop: 10 }}>This is not for perfection. It is for spotting the exact place where tomorrow gets easier.</p>
+            <p className="faint" style={{ marginTop: 10 }}>Keep this light. You are leaving small instructions for tomorrow.</p>
           </div>
 
           <div className="card">
@@ -594,7 +610,7 @@ export default function Today() {
               <button className="btn sage" onClick={() => finishDay('done')} disabled={busy}>Mark done</button>
               <button className="btn ghost" onClick={() => finishDay('rest')} disabled={busy}>Rest day</button>
             </div>
-            <p className="faint" style={{ marginTop: 10 }}>A tiny day still counts. Closing the day keeps your chain honest.</p>
+            <p className="faint" style={{ marginTop: 10 }}>A tiny day still counts. Closing the day keeps the rhythm alive.</p>
           </div>
         </>
       )}

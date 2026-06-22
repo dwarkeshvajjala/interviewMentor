@@ -4,14 +4,14 @@
     "owner": "Dwarkesh",
     "totalDays": 90,
     "weekdayMaxMinutes": 120,
-    "note": "Days 1-14 are explicit rehabilitation days. Day 15 onward is generated from phases + weekday focus + the task bank. The roadmap is the spine; AI only adapts within the current phase."
+    "note": "Days 1-14 are explicit restart days. Day 15 onward is generated from phases + weekday focus + the task bank. The roadmap is the spine; AI only adapts within the current phase."
   },
 
   "consistencyRules": [
     "Never Zero: do at least one tiny thing every day. 10 minutes counts.",
     "Two-Day Rule: missing one day is rest. Never miss two in a row.",
     "No-Guilt Reset: missed tasks are not debt. You do not carry yesterday into today.",
-    "A low-energy day kept the chain alive. That is a win, not a failure."
+    "A low-energy day kept the chain alive. That is a win."
   ],
 
   "modes": {
@@ -26,21 +26,21 @@
     "2": { "name": "SQL",                "topics": ["sql"] },
     "3": { "name": ".NET API",           "topics": ["dotnet"] },
     "4": { "name": "Frontend",           "topics": ["javascript", "typescript", "react", "angular"] },
-    "5": { "name": "Azure / AI / Resume","topics": ["azure", "ai", "resume"] },
-    "6": { "name": "Deep work + mock",   "topics": ["dotnet", "systemdesign", "mock"] }
+    "5": { "name": "Azure / AI / Resume","topics": ["azure", "ai", "resume", "signalr"] },
+    "6": { "name": "Deep work + mock",   "topics": ["dotnet", "systemdesign", "mock", "designpatterns", "efcore"] }
   },
 
   "phases": [
     { "startDay": 15, "endDay": 21,  "week": 3,  "name": ".NET Core & Web API",        "focus": "Become employable in core .NET interviews. Build the Employee API.", "topics": ["dotnet", "csharp", "speaking"] },
-    { "startDay": 22, "endDay": 28,  "week": 4,  "name": "SQL Depth & Project Defense", "focus": "Stop fearing SQL writing. Defend every resume project.",              "topics": ["sql", "resume", "speaking"] },
+    { "startDay": 22, "endDay": 28,  "week": 4,  "name": "SQL Depth & Project Defense", "focus": "Build calm SQL writing. Defend every resume project.",              "topics": ["sql", "resume", "speaking"] },
     { "startDay": 29, "endDay": 35,  "week": 5,  "name": "JavaScript & TypeScript",     "focus": "Be believable as full-stack.",                                        "topics": ["javascript", "typescript", "speaking"] },
     { "startDay": 36, "endDay": 42,  "week": 6,  "name": "React Practical",             "focus": "Handle real frontend interview basics. Build an admin users page.",    "topics": ["react", "javascript", "speaking"] },
     { "startDay": 43, "endDay": 49,  "week": 7,  "name": "Angular Practical",           "focus": "Cover the framework you claim, strongly enough.",                     "topics": ["angular", "typescript", "speaking"] },
     { "startDay": 50, "endDay": 56,  "week": 8,  "name": "Azure & AI Integration",      "focus": "Make your differentiator real and explainable.",                      "topics": ["azure", "ai", "speaking"] },
     { "startDay": 57, "endDay": 63,  "week": 9,  "name": "System Design",               "focus": "Structure answers like a mid-level engineer.",                        "topics": ["systemdesign", "dotnet", "speaking"] },
     { "startDay": 64, "endDay": 70,  "week": 10, "name": "Mock Interview Sprint",       "focus": "Pressure practice. Coding, SQL, .NET, behavioral, project defense.",  "topics": ["mock", "dsa", "speaking"] },
-    { "startDay": 71, "endDay": 77,  "week": 11, "name": "Resume / Portfolio / GitHub", "focus": "Remove avoidable rejection reasons. Align resume, portfolio, GitHub.","topics": ["resume", "dotnet", "speaking"] },
-    { "startDay": 78, "endDay": 90,  "week": 12, "name": "Applications & Real Interviews","focus": "Apply without panic. Every interview becomes practice data.",       "topics": ["mock", "resume", "speaking"] }
+    { "startDay": 71, "endDay": 77,  "week": 11, "name": "Resume / Portfolio / GitHub", "focus": "Make your story easy to trust. Align resume, portfolio, GitHub.","topics": ["resume", "dotnet", "speaking"] },
+    { "startDay": 78, "endDay": 90,  "week": 12, "name": "Applications & Real Interviews","focus": "Apply with calm repetition. Every interview becomes practice data.",       "topics": ["mock", "resume", "speaking"] }
   ],
 
   "explicitDays": [
@@ -95,8 +95,8 @@
     {
       "day": 7, "title": "Week 1 Review", "defaultMode": "normal",
       "tasks": [
-        { "kind": "code",  "title": "Rewrite days 1-6 from memory", "detail": "No looking. Then redo the 2 exercises you struggled with most.", "minutes": 45, "resource": "" },
-        { "kind": "learn", "title": "Gap notes", "detail": "Write down the 3 things that felt hardest this week. These become next week's focus.", "minutes": 20, "resource": "" },
+        { "kind": "code",  "title": "Rewrite days 1-6 from memory", "detail": "No looking. Then redo the 2 exercises that need another pass.", "minutes": 45, "resource": "" },
+        { "kind": "learn", "title": "Focus notes", "detail": "Write down the 3 things that need a calmer second pass. These become next week's focus.", "minutes": 20, "resource": "" },
         { "kind": "speak", "title": "Tell me about yourself", "detail": "Record TMAY (75 sec) and 'what did I work on this week'. Save both as baseline.", "minutes": 20, "resource": "" }
       ]
     },
@@ -152,7 +152,7 @@
       "day": 14, "title": "First Mock Day", "defaultMode": "full",
       "tasks": [
         { "kind": "code",  "title": "Self mock — coding", "detail": "Without notes: explain Main, reverse a string, write one SQL join. Time yourself.", "minutes": 45, "resource": "" },
-        { "kind": "learn", "title": "Review the mock", "detail": "What was unclear? Where did you pause? Which topic felt embarrassing? Write next week's first fix.", "minutes": 30, "resource": "" },
+        { "kind": "learn", "title": "Review the mock", "detail": "What was unclear? Where did you pause? Which topic needs a second pass? Write next week's first fix.", "minutes": 30, "resource": "" },
         { "kind": "speak", "title": "Full mock answer set", "detail": "Record: TMAY, explain HRMS project, 'what if you do not know an answer'. Listen once, note ONE fix.", "minutes": 20, "resource": "" }
       ]
     }

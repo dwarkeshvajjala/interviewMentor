@@ -5,7 +5,7 @@ function seededIndex(key, length) {
 }
 
 function pickDaily(items, salt = '') {
-  if (!items.length) return '';
+  if (!items.length) return items[0];
   const key = `${new Date().toDateString()}-${salt}`;
   return items[seededIndex(key, items.length)];
 }
@@ -14,110 +14,147 @@ export function getTimeGreeting(now = new Date(), name = 'Dwarkesh') {
   const hour = now.getHours();
   if (hour < 5) {
     return {
-      title: `Hello night owl, ${name}`,
-      label: 'late mission',
-      line: 'Tiny rep only. Do one honest thing, then sleep like someone who kept a promise.'
+      title: `Still up, ${name}?`,
+      label: 'late night',
+      line: 'Even one small thing before bed puts you a step ahead of where you were.'
     };
   }
   if (hour < 12) {
     return {
-      title: `Good morning, ${name} sir`,
+      title: `Morning, ${name}`,
       label: 'fresh start',
-      line: 'No heroic speech needed. Open the first task and let momentum do the talking.'
+      line: 'Best time of the day. Start before your brain starts negotiating.'
     };
   }
   if (hour < 17) {
     return {
-      title: `Good afternoon, ${name}`,
-      label: 'midday reset',
-      line: 'The day is still negotiable. A 20-minute save is a real save.'
+      title: `Hey ${name}`,
+      label: 'midday grind',
+      line: 'Afternoon focus hits different. Get one good round in right now.'
     };
   }
   if (hour < 21) {
     return {
-      title: `Good evening, ${name}`,
-      label: 'comeback window',
-      line: 'This is the perfect hour to beat yesterday by one small rep.'
+      title: `Evening, ${name}`,
+      label: 'evening session',
+      line: "This is the session most people skip. You didn't open this for nothing — let's go."
     };
   }
   return {
-    title: `Night shift, ${name}`,
-    label: 'quiet build',
-    line: 'Keep it simple: one note, one task, one close. Future you loves receipts.'
+    title: `Night mode, ${name}`,
+    label: 'late session',
+    line: 'Night work counts. Make it short, make it real, then actually sleep.'
   };
 }
 
-const dailyLines = [
-  {
-    tone: 'inspire',
-    tag: 'truth',
-    text: 'No coding for a year is rust, not identity. Rust comes off with reps.'
-  },
-  {
-    tone: 'roast',
-    tag: 'respectfully',
-    text: 'Scrolling will not compile. One focused rep will at least throw a useful error.'
-  },
-  {
-    tone: 'inspire',
-    tag: 'receipt',
-    text: 'Every tick is proof that the version of you inside your head is becoming visible.'
-  },
-  {
-    tone: 'roast',
-    tag: 'audit',
-    text: 'Your dreams asked for evidence, not vibes. Give them 20 minutes.'
-  },
-  {
-    tone: 'inspire',
-    tag: 'career',
-    text: 'The company version of you is not fixed. Daily practice is how you rewrite the record.'
-  },
-  {
-    tone: 'money',
-    tag: 'future',
-    text: 'Better skills create better options. Better options change money, confidence, and freedom.'
-  }
+const coachLines = [
+  { tone: 'steady', tag: 'today', text: "Just one honest round. The day doesn't need to be perfect." },
+  { tone: 'steady', tag: 'small step', text: "A quiet 20 minutes still moves the needle. You don't need momentum to start — starting creates momentum." },
+  { tone: 'future', tag: 'career', text: "Every answer you practice makes the next interview feel less like a test and more like a normal conversation." },
+  { tone: 'gentle', tag: 'reset', text: "Day feels off? Lower the task size, not the promise to show up." },
+  { tone: 'future', tag: 'range', text: "Clearer thinking, cleaner answers, steadier delivery under pressure. That's what this actually builds." },
+  { tone: 'steady', tag: 'proof', text: "You opened the app. That already separates today from the version of you that didn't." },
+  { tone: 'steady', tag: 'real talk', text: "Most people wait to feel ready. The ones who get there started before they were." },
+  { tone: 'future', tag: 'compound', text: "Today's session compounds quietly. You won't feel it today. You'll feel it in the interview room." },
+  { tone: 'gentle', tag: 'off day', text: "Not your best day? That's fine. Show up anyway. The chain doesn't ask how you felt." },
+  { tone: 'steady', tag: 'identity', text: "You're not just studying. You're building the habit of someone who shows up even when it's inconvenient." },
+  { tone: 'quote', tag: 'Muhammad Ali', text: "Don't count the days. Make the days count." },
+  { tone: 'quote', tag: 'Archilochus', text: "We don't rise to the level of our expectations. We fall to the level of our training." },
+  { tone: 'quote', tag: 'Mark Twain', text: "The secret of getting ahead is getting started." },
+  { tone: 'quote', tag: 'James Clear', text: "Every action is a vote for the type of person you want to become." },
+  { tone: 'quote', tag: 'Seneca', text: "We suffer more in imagination than in reality." },
+  { tone: 'quote', tag: 'Jim Rohn', text: "Discipline is the bridge between goals and accomplishment." },
+  { tone: 'quote', tag: 'Kobe Bryant', text: "The most important thing is to try and inspire people so that they can be great in whatever they want to do." },
+  { tone: 'quote', tag: 'Jocko Willink', text: "Discipline equals freedom." },
+  { tone: 'quote', tag: 'Zig Ziglar', text: "You don't have to be great to start, but you have to start to be great." },
 ];
 
 export function getDailyCoachLine({ streak = 0, doneCount = 0, totalTasks = 0 } = {}) {
   if (totalTasks > 0 && doneCount >= totalTasks) {
     return {
-      tone: 'inspire',
-      tag: 'done',
-      text: 'Clean finish. Close the day and let the streak remember this for you.'
+      tone: 'future',
+      tag: 'done ✓',
+      text: 'All of them checked. Close it clean while the win is fresh — tomorrow starts already ahead.'
     };
   }
   if (streak >= 7) {
     return {
-      tone: 'money',
+      tone: 'future',
       tag: `${streak} days`,
-      text: 'That streak is not decoration. It is your new default forming in public.'
+      text: `${streak} days straight. That's not a streak anymore — that's a habit forming. Protect it.`
     };
   }
   if (streak === 0) {
     return {
-      tone: 'roast',
-      tag: 'start',
-      text: 'The streak is waiting at zero like an unpaid bill. Pay it with one task.'
+      tone: 'steady',
+      tag: 'day one',
+      text: "Every chain starts with the first link. Make today that link."
     };
   }
-  return pickDaily(dailyLines, `daily-${streak}-${doneCount}`);
+  return pickDaily(coachLines, `daily-${streak}-${doneCount}`);
+}
+
+const worldTechniques = [
+  {
+    origin: 'Behavioral science',
+    name: 'Ulysses Rule',
+    tip: "Before you close today, lock tomorrow's first task. Set yourself up while it's still calm — before the distractions start negotiating."
+  },
+  {
+    origin: 'Navy SEALs · David Goggins',
+    name: '40% rule',
+    tip: "When your brain says you're done, you're probably at about 40%. The first quit signal is a negotiation, not a fact. What's one more rep?"
+  },
+  {
+    origin: 'Japan · Kaizen',
+    name: 'Smallest useful step',
+    tip: "What version of today's task is so small it'd be embarrassing not to do? Start there. Small starts beat big intentions every single time."
+  },
+  {
+    origin: 'Soviet sports psychology · A.C. Puni',
+    name: 'Boevaya gotovnost',
+    tip: "Before you start: sit quietly for 90 seconds, picture yourself already mid-task — not beginning, but in flow. Mind leads, body follows."
+  },
+  {
+    origin: 'Behavioral science · Peter Gollwitzer',
+    name: 'If-then plan',
+    tip: 'Write one right now: "If [specific thing pulls me away], I will [specific return action]." Recovery becomes automatic, not a willpower decision.'
+  },
+  {
+    origin: 'James Clear · Atomic Habits',
+    name: 'Identity vote',
+    tip: "Each session is a vote for the person you're becoming. You're not just doing prep today — you're being someone who prepares consistently."
+  },
+  {
+    origin: 'David Allen · GTD',
+    name: '2-minute rule',
+    tip: "If you're avoiding a task, commit to just 2 minutes. That's it. The hardest part is starting — once you're in, you usually stay in."
+  },
+  {
+    origin: 'Stoic philosophy · Marcus Aurelius',
+    name: 'Premeditatio start',
+    tip: '"What\'s the best use of the next hour?" Ask it before you open anything else. Then do that first, before your attention gets pulled anywhere.'
+  },
+];
+
+export function getDailyEdge() {
+  return pickDaily(worldTechniques, 'edge');
 }
 
 export function getProgressCoach({ streak = 0, missedDays = 0, daysEngaged = 0, totalPoints = 0 } = {}) {
   if (streak >= 10) {
-    return 'This is no longer a mood. It is a system. Protect it with boring consistency.';
+    return `${streak} days in a row. That's the hard part done. Keep it calm and repeatable.`;
   }
   if (missedDays > daysEngaged) {
-    return 'The comeback starts by making today smaller, not by hating yesterday harder.';
+    return "Restarts don't need speeches. Make today smaller than you think, finish it clean, and build from there.";
   }
   if (totalPoints >= 30) {
-    return 'You are stacking proof now. Keep converting quiet work into interview confidence.';
+    return "The practice is stacking. You won't feel it session to session — but you'll feel it the moment someone asks a question you've actually worked on.";
   }
   return pickDaily([
-    'Do not wait to feel ready. Readiness is what repeated days leave behind.',
-    'Small daily wins are how you get out of the pit without needing a miracle.',
-    'You already know what you want. This page is just the scoreboard for becoming that person.'
+    'Readiness usually shows up after you begin, not before it.',
+    'A small daily win gives tomorrow something solid to stand on.',
+    'You already know the direction. Today is just one more step that way.',
+    'Consistency is showing up when it doesn\'t feel like the right time. Which is most days.',
   ], 'progress');
 }

@@ -84,14 +84,14 @@ export function planForDate(dateStr) {
     return { dayIndex, beforeStart: true, weekLabel: 'Plan not started yet', phase: '', focus: 'Your plan begins on ' + START, tasks: [] };
   }
 
-  // Explicit rehabilitation days 1-14
+  // Explicit restart days 1-14
   const explicit = roadmap.explicitDays.find(d => d.day === dayIndex);
   if (explicit) {
     return {
       dayIndex,
       weekLabel: dayIndex <= 7 ? 'Week 1 — Programming restart' : 'Week 2 — Basics, SQL & first mock',
       phase: explicit.title,
-      focus: 'Rehabilitation day. Restart the machine, do not judge yourself.',
+      focus: 'Restart day. Keep it simple and build one clean rep.',
       defaultMode: explicit.defaultMode || 'normal',
       tasks: explicit.tasks.map(t => ({ kind: t.kind, title: t.title, detail: t.detail, resource_url: t.resource || '', minutes: t.minutes }))
     };

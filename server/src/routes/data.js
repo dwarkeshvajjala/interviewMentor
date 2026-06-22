@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { requireSupabase, supabase } from '../supabase.js';
 import { phases, consistencyRules, planStartDate, todayDate } from '../planner.js';
-import { syncQuestion, syncApplication } from '../notion.js';
+import { syncQuestion, syncApplication, syncRecording } from '../notion.js';
 
 const router = Router();
 
@@ -35,7 +35,7 @@ function crud(table, { syncFn } = {}) {
 
 router.use('/questions', requireSupabase, crud('questions', { syncFn: syncQuestion }));
 router.use('/applications', requireSupabase, crud('applications', { syncFn: syncApplication }));
-router.use('/recordings', requireSupabase, crud('recordings'));
+router.use('/recordings', requireSupabase, crud('recordings', { syncFn: syncRecording }));
 
 // ---------- roadmap (read-only view) ----------
 router.get('/roadmap', (req, res) => {

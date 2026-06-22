@@ -115,6 +115,7 @@ router.post('/log', async (req, res) => {
 
 // Mark the day's status (done / rest / skipped) and sync a summary to Notion.
 router.post('/day/status', async (req, res) => {
+  const mode_to_mins = { full: 120, normal: 90, low: 20 };
   try {
     const dateStr = req.body.date || todayDate();
     const status = req.body.status || 'done';
@@ -128,9 +129,12 @@ router.post('/day/status', async (req, res) => {
     const summary = `${doneCount}/${(tasks || []).length} tasks done. ${day.phase || ''}`.trim();
 
     // Fire-and-forget Notion sync (does nothing if Notion not configured).
+    const durationMins = mode_to_mins[day.mode] ?? null;
     syncDailyLog({
       the_date: dateStr, mode: day.mode, status,
-      energy: log?.energy, mood: log?.mood, summary
+      energy: log?.energy, mood: log?.mood, summary,
+      week_label: day.week_label,
+      duration_minutes: durationMins
     }).catch(() => {});
 
     res.json({ day, synced: !!process.env.NOTION_DAILY_DB_ID });

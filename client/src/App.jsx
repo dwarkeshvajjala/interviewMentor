@@ -5,6 +5,7 @@ import Roadmap from './pages/Roadmap.jsx';
 import Questions from './pages/Questions.jsx';
 import Speaking from './pages/Speaking.jsx';
 import Progress from './pages/Progress.jsx';
+import Applications from './pages/Applications.jsx';
 import { api } from './api.js';
 
 const tabs = [
@@ -12,6 +13,7 @@ const tabs = [
   ['/roadmap', 'Roadmap'],
   ['/questions', 'Questions'],
   ['/speaking', 'Speaking'],
+  ['/applications', 'Applications'],
   ['/progress', 'Progress']
 ];
 
@@ -66,40 +68,81 @@ export default function App() {
     localStorage.setItem('mentor-theme', theme);
   }, [theme]);
 
+  function toggleTheme() {
+    setTheme(t => t === 'dark' ? 'light' : 'dark');
+  }
+
+  const navItems = tabs.map(([to, label]) => (
+    <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => isActive ? 'active' : ''}>
+      {label}
+    </NavLink>
+  ));
+
   return (
-    <div className="shell">
-      <div className="topbar">
-        <div className="brand">
+    <div className="app-shell">
+
+      {/* ── Sidebar (desktop) ── */}
+      <aside className="sidebar">
+        <div className="sidebar-inner">
+          <div className="sidebar-brand">
+            <span className="lamp" />
+            <div>
+              <span className="sidebar-brand-name">Mentor</span>
+              <span className="sidebar-brand-sub">interview prep</span>
+            </div>
+          </div>
+          <nav className="sidebar-nav">
+            {navItems}
+          </nav>
+        </div>
+        <div className="sidebar-footer">
+          <button
+            className="theme-toggle"
+            type="button"
+            aria-pressed={theme === 'light'}
+            onClick={toggleTheme}
+          >
+            {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+          </button>
+        </div>
+      </aside>
+
+      {/* ── Mobile header ── */}
+      <header className="mobile-header">
+        <div className="mobile-brand">
           <span className="lamp" />
           <b>Mentor</b>
-          <span>your daily prep, one screen</span>
         </div>
         <button
           className="theme-toggle"
           type="button"
           aria-pressed={theme === 'light'}
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          onClick={toggleTheme}
         >
           {theme === 'dark' ? 'Bright' : 'Dark'}
         </button>
-      </div>
-      <SetupStatus />
+      </header>
 
-      <nav className="tabs">
-        {tabs.map(([to, label]) => (
-          <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => isActive ? 'active' : ''}>
-            {label}
-          </NavLink>
-        ))}
+      {/* ── Mobile nav ── */}
+      <nav className="mobile-tabs">
+        {navItems}
       </nav>
 
-      <Routes>
-        <Route path="/" element={<Today />} />
-        <Route path="/roadmap" element={<Roadmap />} />
-        <Route path="/questions" element={<Questions />} />
-        <Route path="/speaking" element={<Speaking />} />
-        <Route path="/progress" element={<Progress />} />
-      </Routes>
+      {/* ── Main content ── */}
+      <main className="main-area">
+        <div className="content-wrap">
+          <SetupStatus />
+          <Routes>
+            <Route path="/" element={<Today />} />
+            <Route path="/roadmap" element={<Roadmap />} />
+            <Route path="/questions" element={<Questions />} />
+            <Route path="/speaking" element={<Speaking />} />
+            <Route path="/applications" element={<Applications />} />
+            <Route path="/progress" element={<Progress />} />
+          </Routes>
+        </div>
+      </main>
+
     </div>
   );
 }
