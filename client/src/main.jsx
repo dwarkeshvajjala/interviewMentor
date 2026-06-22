@@ -1,4 +1,4 @@
-// frontend v1.1 — ci/cd check
+// frontend v1.2 — rebuild with VITE_API_URL
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
