@@ -55,6 +55,17 @@ function SetupStatus() {
 }
 
 export default function App() {
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('mentor-theme');
+    if (saved === 'light' || saved === 'dark') return saved;
+    return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  });
+
+  useEffect(() => {
+    document.body.dataset.theme = theme;
+    localStorage.setItem('mentor-theme', theme);
+  }, [theme]);
+
   return (
     <div className="shell">
       <div className="topbar">
@@ -63,6 +74,14 @@ export default function App() {
           <b>Mentor</b>
           <span>your daily prep, one screen</span>
         </div>
+        <button
+          className="theme-toggle"
+          type="button"
+          aria-pressed={theme === 'light'}
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        >
+          {theme === 'dark' ? 'Bright' : 'Dark'}
+        </button>
       </div>
       <SetupStatus />
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { ErrorState, LoadingState } from '../components/States.jsx';
+import { getProgressCoach } from '../motivation.js';
 
 const dayClass = (s) => {
   if (!s || s.status === 'missed' || s.status === 'skipped') return 'missed';
@@ -91,10 +92,29 @@ export default function Progress() {
 
   const recent = (p.series || []).slice(-28);
   const maxPts = 3;
+  const recentWeek = (p.series || []).slice(-7);
+  const weeklyPoints = recentWeek.reduce((sum, s) => sum + (s.points || 0), 0);
+  const coach = getProgressCoach(p);
+  const reflectionLogs = (p.recentLogs || []).filter(log =>
+    log.what_felt_hard || log.what_avoided || log.minutes_tomorrow || log.energy || log.mood
+  );
 
   return (
     <div className="fade-in">
       <h2 className="section-title">Progress</h2>
+
+      <div className="card momentum-card">
+        <div>
+          <div className="eyebrow">Momentum</div>
+          <h3>{p.streak > 0 ? `${p.streak} day chain is alive` : 'Today can restart the chain'}</h3>
+          <p className="muted">{coach}</p>
+        </div>
+        <div className="momentum-stats">
+          <span><b>{weeklyPoints}</b> pts this week</span>
+          <span><b>{p.daysEngaged}</b> show-ups</span>
+          <span><b>{p.missedDays || 0}</b> misses</span>
+        </div>
+      </div>
 
       <div className="card" style={{ marginBottom: 14 }}>
         <div className="label-row"><h3>Last weeks</h3><span className="faint">amber = full - green = normal - dim = low</span></div>
@@ -121,6 +141,28 @@ export default function Progress() {
 
       <div className="card" style={{ marginTop: 14 }}>
         <p className="muted" style={{ margin: 0 }}>Weekly target: 8 points minimum, 12 good, 16+ excellent. Full day = 3, normal = 2, low = 1. Uneven days are fine. Disappearing for many days is the only real failure.</p>
+      </div>
+
+      <div className="card diary-review">
+        <div className="label-row">
+          <h3>Recent diary</h3>
+          <span className="faint">read this before judging yourself</span>
+        </div>
+        {reflectionLogs.length === 0 ? (
+          <p className="muted" style={{ margin: 0 }}>No diary reflections yet. Add one on Today after your next sprint.</p>
+        ) : reflectionLogs.map(log => (
+          <div key={log.the_date} className="reflection-row">
+            <div className="reflection-date">
+              <b>{new Date(log.the_date + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</b>
+              <span>energy {log.energy || '-'} / mood {log.mood || '-'}</span>
+            </div>
+            <div>
+              {log.what_felt_hard && <p><span>Hard:</span> {log.what_felt_hard}</p>}
+              {log.what_avoided && <p><span>Next rep:</span> {log.what_avoided}</p>}
+              {log.minutes_tomorrow && <p><span>Promise:</span> {log.minutes_tomorrow} minutes tomorrow</p>}
+            </div>
+          </div>
+        ))}
       </div>
 
     </div>

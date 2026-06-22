@@ -93,14 +93,18 @@ router.post('/day/mode', async (req, res) => {
 router.post('/log', async (req, res) => {
   try {
     const dateStr = req.body.date || todayDate();
-    const row = {
-      the_date: dateStr,
-      energy: req.body.energy ?? null,
-      mood: req.body.mood ?? null,
-      what_felt_hard: req.body.what_felt_hard || null,
-      what_avoided: req.body.what_avoided || null,
-      minutes_tomorrow: req.body.minutes_tomorrow ?? null
-    };
+    const row = { the_date: dateStr };
+    if (Object.prototype.hasOwnProperty.call(req.body, 'energy')) row.energy = req.body.energy ?? null;
+    if (Object.prototype.hasOwnProperty.call(req.body, 'mood')) row.mood = req.body.mood ?? null;
+    if (Object.prototype.hasOwnProperty.call(req.body, 'what_felt_hard')) {
+      row.what_felt_hard = req.body.what_felt_hard?.trim() || null;
+    }
+    if (Object.prototype.hasOwnProperty.call(req.body, 'what_avoided')) {
+      row.what_avoided = req.body.what_avoided?.trim() || null;
+    }
+    if (Object.prototype.hasOwnProperty.call(req.body, 'minutes_tomorrow')) {
+      row.minutes_tomorrow = req.body.minutes_tomorrow ?? null;
+    }
     const { data, error } = await supabase.from('logs').upsert(row, { onConflict: 'the_date' }).select().single();
     if (error) throw error;
     res.json({ log: data });

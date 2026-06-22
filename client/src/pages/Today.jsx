@@ -2,8 +2,17 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { ErrorState, InlineNotice, LoadingState } from '../components/States.jsx';
 import { useSpeechInput } from '../useSpeechInput.js';
+import { getDailyCoachLine, getTimeGreeting } from '../motivation.js';
 
 const MODES = [['full', 'Full - 2h'], ['normal', 'Normal - 90m'], ['low', 'Low - 20m']];
+const DEFAULT_PACT = {
+  wish: 'Become interview-ready and build better money/options.',
+  outcome: 'Confidence, freedom, and proof that I can get out of this pit.',
+  obstacle: 'Evening scrolling, shame, porn urges, tiredness, and waiting to feel ready.',
+  plan: 'If I want to escape, then I open Mentor and do one 10-minute sprint first.',
+  friction: 'Phone away. No private tabs or random scrolling until the day is closed.',
+  reward: 'After the sprint: music, tea, short walk, or one guilt-free video.'
+};
 
 function Chain({ series }) {
   const recent = (series || []).slice(-21);
@@ -24,15 +33,250 @@ function Chain({ series }) {
   );
 }
 
+function formatSprint(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = String(seconds % 60).padStart(2, '0');
+  return `${mins}:${secs}`;
+}
+
+function FocusSprint({ date, mode }) {
+  const fallbackMinutes = mode === 'full' ? 45 : mode === 'low' ? 10 : 20;
+  const [target, setTarget] = useState(fallbackMinutes);
+  const [secondsLeft, setSecondsLeft] = useState(fallbackMinutes * 60);
+  const [running, setRunning] = useState(false);
+  const [completed, setCompleted] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(false);
+    const saved = localStorage.getItem(`mentor-sprint-${date}`);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setTarget(parsed.target || fallbackMinutes);
+        setSecondsLeft(parsed.secondsLeft ?? (parsed.target || fallbackMinutes) * 60);
+        setCompleted(Boolean(parsed.completed));
+        setRunning(false);
+        setHydrated(true);
+        return;
+      } catch {
+        localStorage.removeItem(`mentor-sprint-${date}`);
+      }
+    }
+    setTarget(fallbackMinutes);
+    setSecondsLeft(fallbackMinutes * 60);
+    setRunning(false);
+    setCompleted(false);
+    setHydrated(true);
+  }, [date, fallbackMinutes]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    localStorage.setItem(`mentor-sprint-${date}`, JSON.stringify({ target, secondsLeft, completed }));
+  }, [date, target, secondsLeft, completed, hydrated]);
+
+  useEffect(() => {
+    if (!running) return undefined;
+    if (secondsLeft <= 0) {
+      setRunning(false);
+      setCompleted(true);
+      return undefined;
+    }
+    const timer = window.setInterval(() => setSecondsLeft(s => Math.max(s - 1, 0)), 1000);
+    return () => window.clearInterval(timer);
+  }, [running, secondsLeft]);
+
+  function chooseTarget(minutes) {
+    setTarget(minutes);
+    setSecondsLeft(minutes * 60);
+    setRunning(false);
+    setCompleted(false);
+  }
+
+  function reset() {
+    setSecondsLeft(target * 60);
+    setRunning(false);
+    setCompleted(false);
+  }
+
+  const progress = Math.min(100, Math.max(0, 100 - (secondsLeft / (target * 60)) * 100));
+  const copy = completed
+    ? 'Sprint complete. That is a real vote for the person you are building.'
+    : running
+      ? 'Stay here. One tab, one rep, one promise.'
+      : 'Start a tiny sprint before your brain starts negotiating.';
+
+  return (
+    <div className={`card focus-sprint ${running ? 'running' : ''} ${completed ? 'complete' : ''}`}>
+      <div className="label-row">
+        <h3>Focus sprint</h3>
+        <span className="faint">keep the site open, keep the promise</span>
+      </div>
+      <div className="sprint-body">
+        <div>
+          <div className="sprint-time">{formatSprint(secondsLeft)}</div>
+          <p className="muted" style={{ margin: '4px 0 0' }}>{copy}</p>
+        </div>
+        <div className="sprint-actions">
+          <div className="row">
+            {[10, 20, 45].map(minutes => (
+              <button key={minutes} className={`chip ${target === minutes ? 'on' : ''}`} onClick={() => chooseTarget(minutes)}>
+                {minutes}m
+              </button>
+            ))}
+          </div>
+          <div className="row">
+            <button className="btn primary" onClick={() => setRunning(!running)}>
+              {running ? 'Pause' : completed ? 'Again' : 'Start'}
+            </button>
+            <button className="btn ghost" onClick={reset}>Reset</button>
+          </div>
+        </div>
+      </div>
+      <div className="sprint-track"><span style={{ width: `${progress}%` }} /></div>
+    </div>
+  );
+}
+
+function loadPact() {
+  const saved = localStorage.getItem('mentor-discipline-pact-v1');
+  if (!saved) return DEFAULT_PACT;
+  try {
+    return { ...DEFAULT_PACT, ...JSON.parse(saved) };
+  } catch {
+    localStorage.removeItem('mentor-discipline-pact-v1');
+    return DEFAULT_PACT;
+  }
+}
+
+function DisciplinePact({ date }) {
+  const [pact, setPact] = useState(loadPact);
+  const [locked, setLocked] = useState(() => localStorage.getItem(`mentor-pact-locked-${date}`) === 'true');
+
+  useEffect(() => {
+    localStorage.setItem('mentor-discipline-pact-v1', JSON.stringify(pact));
+  }, [pact]);
+
+  useEffect(() => {
+    setLocked(localStorage.getItem(`mentor-pact-locked-${date}`) === 'true');
+  }, [date]);
+
+  function update(key, value) {
+    setPact(prev => ({ ...prev, [key]: value }));
+  }
+
+  function lockToday() {
+    const next = !locked;
+    setLocked(next);
+    localStorage.setItem(`mentor-pact-locked-${date}`, String(next));
+  }
+
+  return (
+    <div className={`card pact-card ${locked ? 'locked' : ''}`}>
+      <div className="label-row">
+        <h3>Discipline pact</h3>
+        <button className={`btn sm ${locked ? 'sage' : 'ghost'}`} onClick={lockToday}>
+          {locked ? 'Pact locked' : 'Lock today'}
+        </button>
+      </div>
+      <div className="pact-grid">
+        <label className="field-block">
+          <span>Wish</span>
+          <input value={pact.wish} onChange={e => update('wish', e.target.value)} />
+        </label>
+        <label className="field-block">
+          <span>Outcome</span>
+          <input value={pact.outcome} onChange={e => update('outcome', e.target.value)} />
+        </label>
+        <label className="field-block">
+          <span>Obstacle</span>
+          <textarea value={pact.obstacle} onChange={e => update('obstacle', e.target.value)} />
+        </label>
+        <label className="field-block">
+          <span>If-then plan</span>
+          <textarea value={pact.plan} onChange={e => update('plan', e.target.value)} />
+        </label>
+      </div>
+      <div className="pact-rules">
+        <label className="field-block">
+          <span>Friction rule</span>
+          <input value={pact.friction} onChange={e => update('friction', e.target.value)} />
+        </label>
+        <label className="field-block">
+          <span>Clean reward</span>
+          <input value={pact.reward} onChange={e => update('reward', e.target.value)} />
+        </label>
+      </div>
+      <p className="faint" style={{ margin: '10px 0 0' }}>
+        Rule: make discipline automatic before the urge starts arguing. No shame spiral, just the next rep.
+      </p>
+    </div>
+  );
+}
+
+function UrgeReset() {
+  const [secondsLeft, setSecondsLeft] = useState(0);
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    if (secondsLeft <= 0) return undefined;
+    const timer = window.setInterval(() => setSecondsLeft(s => Math.max(s - 1, 0)), 1000);
+    return () => window.clearInterval(timer);
+  }, [secondsLeft]);
+
+  useEffect(() => {
+    if (secondsLeft === 0 && done) setDone(false);
+  }, [secondsLeft, done]);
+
+  function start() {
+    setSecondsLeft(90);
+    setDone(true);
+  }
+
+  const active = secondsLeft > 0;
+
+  return (
+    <div className={`card reset-card ${active ? 'active' : ''}`}>
+      <div className="label-row">
+        <h3>Urge reset</h3>
+        <span className="faint">for scroll, porn, panic, avoidance</span>
+      </div>
+      <div className="reset-layout">
+        <div>
+          <div className="reset-timer">{active ? formatSprint(secondsLeft) : '90s'}</div>
+          <p className="muted" style={{ margin: '4px 0 0' }}>
+            {active ? 'Breathe slower than the urge. It can rise without becoming a command.' : 'When the escape urge hits, start here before deciding anything.'}
+          </p>
+        </div>
+        <ol className="reset-steps">
+          <li>Name it: "this is an urge, not an order."</li>
+          <li>Breathe: 4 seconds in, 6 seconds out.</li>
+          <li>Move: 10 squats, pushups, or a one-minute walk.</li>
+          <li>Open the first task and do a 10-minute sprint.</li>
+        </ol>
+      </div>
+      <div className="row" style={{ marginTop: 12 }}>
+        <button className="btn primary" onClick={start}>{active ? 'Restart reset' : 'Start urge reset'}</button>
+        <button className="btn ghost" onClick={() => setSecondsLeft(0)}>I am back</button>
+      </div>
+    </div>
+  );
+}
+
 export default function Today() {
   const [data, setData] = useState(null);
-  const [series, setSeries] = useState([]);
+  const [progress, setProgress] = useState({ series: [], streak: 0, totalPoints: 0 });
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
 
   const [energy, setEnergy] = useState(null);
   const [mood, setMood] = useState(null);
+  const [hardThing, setHardThing] = useState('');
+  const [avoidedThing, setAvoidedThing] = useState('');
+  const [tomorrowMinutes, setTomorrowMinutes] = useState('');
+  const [diaryMsg, setDiaryMsg] = useState('');
+  const [diaryBusy, setDiaryBusy] = useState(false);
 
   const [note, setNote] = useState('');
   const [noteTopic, setNoteTopic] = useState('');
@@ -48,8 +292,14 @@ export default function Today() {
       setErr('');
       const [t, p] = await Promise.all([api.getToday(), api.progress().catch(() => ({ series: [] }))]);
       setData(t);
-      setSeries(p.series || []);
-      if (t.log) { setEnergy(t.log.energy); setMood(t.log.mood); }
+      setProgress(p || { series: [] });
+      if (t.log) {
+        setEnergy(t.log.energy);
+        setMood(t.log.mood);
+        setHardThing(t.log.what_felt_hard || '');
+        setAvoidedThing(t.log.what_avoided || '');
+        setTomorrowMinutes(t.log.minutes_tomorrow ?? '');
+      }
     } catch (e) { setErr(e.message); }
   }
   useEffect(() => { load(); }, []);
@@ -121,18 +371,41 @@ export default function Today() {
     setNoteBusy(false);
   }
 
+  async function saveDiary() {
+    setDiaryBusy(true);
+    setDiaryMsg('');
+    setErr('');
+    try {
+      const minutes = tomorrowMinutes === '' ? null : Number(tomorrowMinutes);
+      await api.saveLog({
+        date: day.the_date,
+        what_felt_hard: hardThing,
+        what_avoided: avoidedThing,
+        minutes_tomorrow: Number.isFinite(minutes) ? minutes : null
+      });
+      setDiaryMsg('Diary saved. This is your receipt for showing up.');
+    } catch (e) {
+      setErr(`Could not save diary: ${e.message}`);
+      console.warn('[today] diary save failed', e);
+    }
+    setDiaryBusy(false);
+  }
+
   async function finishDay(status) {
     setBusy(true); setErr('');
     try {
       await api.setStatus(day.the_date, status);
       setMsg(status === 'done' ? 'Day marked done. Chain alive.' : status === 'rest' ? 'Rest day logged. No guilt.' : 'Logged.');
       const p = await api.progress().catch(() => ({ series: [] }));
-      setSeries(p.series || []);
+      setProgress(p || { series: [] });
     } catch (e) { setErr(e.message); }
     setBusy(false);
   }
 
   const today = new Date(day.the_date + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+  const streak = progress?.streak || 0;
+  const greeting = getTimeGreeting();
+  const coachLine = getDailyCoachLine({ streak, doneCount, totalTasks: tasks.length });
 
   return (
     <div className="fade-in">
@@ -144,10 +417,28 @@ export default function Today() {
           </div>
         </div>
       )}
-      <div className="card">
-        <div className="eyebrow">{day.week_label || 'Plan'}{!beforeStart && ` - Day ${day.day_index}`}</div>
-        <h1 className="day-title">{today}</h1>
-        <p className="focus">{day.focus}</p>
+      <div className="card hero-card">
+        <div className="hero-top">
+          <div>
+            <div className="eyebrow">{greeting.label} - {day.week_label || 'Plan'}{!beforeStart && ` - Day ${day.day_index}`}</div>
+            <h1 className="day-title">{greeting.title}</h1>
+            <p className="focus">{greeting.line}</p>
+          </div>
+          {!beforeStart && (
+            <div className="streak-badge">
+              <span>{streak}</span>
+              <small>day streak</small>
+            </div>
+          )}
+        </div>
+        <div className={`coach-strip ${coachLine.tone}`}>
+          <span>{coachLine.tag}</span>
+          <p>{coachLine.text}</p>
+        </div>
+        <div className="day-focus">
+          <span>{today}</span>
+          <b>{day.focus}</b>
+        </div>
         {!beforeStart && (
           <div className="today-summary">
             <div>
@@ -164,7 +455,7 @@ export default function Today() {
             </div>
           </div>
         )}
-        <Chain series={series} />
+        <Chain series={progress?.series || []} />
       </div>
 
       {beforeStart ? (
@@ -198,6 +489,12 @@ export default function Today() {
               ))}
             </div>
           </div>
+
+          <DisciplinePact date={day.the_date} />
+
+          <UrgeReset />
+
+          <FocusSprint date={day.the_date} mode={day.mode} />
 
           <div className="card">
             <div className="label-row">
@@ -246,6 +543,49 @@ export default function Today() {
                 {feedback.restudy_flag && <div className="restudy" style={{ marginTop: 8 }}>Worth a re-study before moving on.</div>}
               </div>
             )}
+          </div>
+
+          <div className="card diary-card">
+            <div className="label-row">
+              <h3>Daily diary</h3>
+              <span className="faint">private, honest, useful</span>
+            </div>
+            <div className="diary-grid">
+              <label className="field-block">
+                <span>What felt hard today?</span>
+                <textarea
+                  placeholder="Example: I avoided SQL joins because I felt slow..."
+                  value={hardThing}
+                  onChange={e => setHardThing(e.target.value)}
+                />
+              </label>
+              <label className="field-block">
+                <span>What did I avoid, and what is the smallest next rep?</span>
+                <textarea
+                  placeholder="Example: I avoided speaking. Tomorrow I will record 60 seconds."
+                  value={avoidedThing}
+                  onChange={e => setAvoidedThing(e.target.value)}
+                />
+              </label>
+            </div>
+            <div className="row" style={{ marginTop: 10 }}>
+              <label className="mini-field">
+                <span>Tomorrow promise</span>
+                <input
+                  type="number"
+                  min="5"
+                  max="180"
+                  value={tomorrowMinutes}
+                  onChange={e => setTomorrowMinutes(e.target.value)}
+                  placeholder="20"
+                />
+              </label>
+              <button className="btn sage" onClick={saveDiary} disabled={diaryBusy}>
+                {diaryBusy ? 'Saving...' : 'Save diary'}
+              </button>
+            </div>
+            {diaryMsg && <div className="toast">{diaryMsg}</div>}
+            <p className="faint" style={{ marginTop: 10 }}>This is not for perfection. It is for spotting the exact place where tomorrow gets easier.</p>
           </div>
 
           <div className="card">

@@ -95,6 +95,11 @@ router.get('/progress', requireSupabase, async (req, res) => {
     const { count: questionsCount } = await supabase.from('questions').select('*', { count: 'exact', head: true });
     const { count: canAnswer } = await supabase.from('questions').select('*', { count: 'exact', head: true }).eq('status', 'Can Answer');
     const { count: apps } = await supabase.from('applications').select('*', { count: 'exact', head: true });
+    const { data: recentLogs } = await supabase
+      .from('logs')
+      .select('the_date, energy, mood, what_felt_hard, what_avoided, minutes_tomorrow, created_at')
+      .order('the_date', { ascending: false })
+      .limit(7);
 
     res.json({
       totalPoints: total,
@@ -104,7 +109,8 @@ router.get('/progress', requireSupabase, async (req, res) => {
       series,
       questionsCount: questionsCount || 0,
       canAnswer: canAnswer || 0,
-      applications: apps || 0
+      applications: apps || 0,
+      recentLogs: recentLogs || []
     });
   } catch (e) {
     res.status(500).json({ error: String(e.message || e) });
