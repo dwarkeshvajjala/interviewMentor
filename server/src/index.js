@@ -1,4 +1,4 @@
-// backend v1.1 — ci/cd check
+// backend v1.2 — rebuild with CLIENT_ORIGIN env var
 import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
