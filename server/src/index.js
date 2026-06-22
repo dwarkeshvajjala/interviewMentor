@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
+import { fileURLToPath } from 'url';
 
 import todayRoutes from './routes/today.js';
 import aiRoutes from './routes/ai.js';
@@ -53,10 +54,15 @@ app.use('/api', todayRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api', dataRoutes);
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`Interview Mentor API running on http://localhost:${PORT}`);
-  if (!hasSupabaseConfig) console.log('  ! Set DATABASE_URL, or SUPABASE_URL / SUPABASE_SERVICE_KEY, in server/.env');
-  if (!process.env.GROQ_API_KEY) console.log('  ! Set GROQ_API_KEY in server/.env for AI features');
-  if (!process.env.APP_PASSCODE) console.log('  ! APP_PASSCODE is empty - API is open. Set one before deploying.');
-});
+export default app;
+
+const isCliEntry = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+if (isCliEntry) {
+  const PORT = process.env.PORT || 4000;
+  app.listen(PORT, () => {
+    console.log(`Interview Mentor API running on http://localhost:${PORT}`);
+    if (!hasSupabaseConfig) console.log('  ! Set DATABASE_URL, or SUPABASE_URL / SUPABASE_SERVICE_KEY, in server/.env');
+    if (!process.env.GROQ_API_KEY) console.log('  ! Set GROQ_API_KEY in server/.env for AI features');
+    if (!process.env.APP_PASSCODE) console.log('  ! APP_PASSCODE is empty - API is open. Set one before deploying.');
+  });
+}
