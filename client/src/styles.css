@@ -1254,6 +1254,72 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
 .coach-tools {
   border-color: rgba(244,185,91,0.28);
 }
+.hard-mode-panel {
+  border-color: rgba(119,134,154,0.35);
+}
+.hard-mode-panel.on {
+  border-color: rgba(251,139,139,0.42);
+  background:
+    linear-gradient(135deg, rgba(251,139,139,0.08), transparent 46%),
+    linear-gradient(180deg, var(--surface), var(--bg-2));
+}
+.hard-rule {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--panel-wash);
+  padding: 9px 10px;
+  margin: 10px 0;
+}
+.hard-rule span {
+  display: block;
+  color: var(--faint);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 3px;
+}
+.hard-rule b {
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.hard-mode-panel textarea {
+  min-height: 78px;
+  font-size: 13px;
+}
+.hard-skip-box {
+  border: 1px solid rgba(251,139,139,0.38);
+  border-radius: var(--radius-sm);
+  background: rgba(251,139,139,0.06);
+  padding: 11px;
+}
+.hard-skip-box b {
+  display: block;
+  font-family: var(--display);
+  font-size: 14px;
+}
+.hard-skip-box p {
+  margin: 5px 0 9px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.hard-skip-box textarea {
+  min-height: 74px;
+  font-size: 13px;
+}
+.checkline {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  color: var(--muted);
+  font-size: 12.5px;
+  margin-bottom: 9px;
+}
+.checkline input {
+  width: auto;
+  margin-top: 3px;
+  flex: none;
+}
 .tool-highlight {
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-sm);

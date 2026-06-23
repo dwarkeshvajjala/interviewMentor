@@ -27,6 +27,7 @@ const PUSH_STYLES = {
     line: 'One more clean rep before negotiation. The quit signal is information, not an order.'
   }
 };
+const DEFAULT_HARD_CONTRACT = 'Before I skip, I will do the ugly 2-minute version. If I still skip, no entertainment until tomorrow.';
 
 function formatSprint(seconds) {
   const mins = Math.floor(seconds / 60);
@@ -210,6 +211,31 @@ function DisciplineLaunch({
   );
 }
 
+function HardModePanel({ enabled, onToggle, contract, onContract, firstTaskTitle }) {
+  return (
+    <div className={`rail-panel hard-mode-panel ${enabled ? 'on' : ''}`}>
+      <div className="label-row">
+        <h3>Hard mode</h3>
+        <button className={`btn sm ${enabled ? 'sage' : 'ghost'}`} onClick={() => onToggle(!enabled)}>
+          {enabled ? 'On' : 'Off'}
+        </button>
+      </div>
+      <p className="muted">
+        Makes quitting slower than starting. If this is on, skipping asks for a reason,
+        a 20-second pause, and proof that you tried the tiny version first.
+      </p>
+      <div className="hard-rule">
+        <span>First move</span>
+        <b>{firstTaskTitle || 'Open the first card and work for 2 minutes.'}</b>
+      </div>
+      <label className="field-block">
+        <span>Contract with yourself</span>
+        <textarea value={contract} onChange={e => onContract(e.target.value)} />
+      </label>
+    </div>
+  );
+}
+
 function CoachTools({ date, firstTaskTitle }) {
   const edge = getDailyEdge();
   const [pact, setPact] = useState(loadPact);
@@ -383,6 +409,14 @@ export default function Today() {
   const [reward, setReward] = useState(() => (
     localStorage.getItem('mentor-first-card-reward') || 'Tea, music, or a short walk after the first card.'
   ));
+  const [hardMode, setHardMode] = useState(() => localStorage.getItem('mentor-hard-mode') === 'true');
+  const [hardContract, setHardContract] = useState(() => (
+    localStorage.getItem('mentor-hard-contract') || DEFAULT_HARD_CONTRACT
+  ));
+  const [skipArmed, setSkipArmed] = useState(false);
+  const [skipSeconds, setSkipSeconds] = useState(0);
+  const [skipReason, setSkipReason] = useState('');
+  const [entryTried, setEntryTried] = useState(false);
 
   const [energy, setEnergy] = useState(null);
   const [mood, setMood] = useState(null);
@@ -403,6 +437,20 @@ export default function Today() {
   useEffect(() => {
     localStorage.setItem('mentor-first-card-reward', reward);
   }, [reward]);
+
+  useEffect(() => {
+    localStorage.setItem('mentor-hard-mode', String(hardMode));
+  }, [hardMode]);
+
+  useEffect(() => {
+    localStorage.setItem('mentor-hard-contract', hardContract);
+  }, [hardContract]);
+
+  useEffect(() => {
+    if (!skipArmed || skipSeconds <= 0) return undefined;
+    const timer = window.setInterval(() => setSkipSeconds(s => Math.max(s - 1, 0)), 1000);
+    return () => window.clearInterval(timer);
+  }, [skipArmed, skipSeconds]);
 
   async function load() {
     try {
@@ -542,6 +590,29 @@ export default function Today() {
       setErr(e.message);
     }
     setBusy(false);
+  }
+
+  function requestSkip() {
+    if (!hardMode) {
+      finishDay('skipped');
+      return;
+    }
+    setSkipArmed(true);
+    setSkipSeconds(20);
+    setEntryTried(false);
+    setSkipReason('');
+    setErr('');
+  }
+
+  async function confirmHardSkip() {
+    if (!entryTried || skipSeconds > 0 || skipReason.trim().length < 12) return;
+    localStorage.setItem(`mentor-hard-skip-${day.the_date}`, JSON.stringify({
+      reason: skipReason.trim(),
+      contract: hardContract,
+      at: new Date().toISOString()
+    }));
+    setSkipArmed(false);
+    await finishDay('skipped');
   }
 
   return (
@@ -708,12 +779,47 @@ export default function Today() {
 
             <FocusSprint date={day.the_date} mode={day.mode} />
 
+            <HardModePanel
+              enabled={hardMode}
+              onToggle={setHardMode}
+              contract={hardContract}
+              onContract={setHardContract}
+              firstTaskTitle={firstTaskTitle}
+            />
+
             <div className="rail-panel close-panel">
               <div className="label-row"><h3>Close the day</h3></div>
               <p className="muted">The rule is strict now: no finished card, no streak point. Searching or opening the app does not count by itself.</p>
               <button className="btn sage" onClick={() => finishDay('done')} disabled={busy || !canClose}>Close day</button>
               {!canClose && <p className="faint">Move one card to Done first.</p>}
-              <button className="btn ghost" onClick={() => finishDay('skipped')} disabled={busy}>Leave out of streak</button>
+              <button className="btn ghost" onClick={requestSkip} disabled={busy}>
+                {hardMode ? 'Try to skip' : 'Leave out of streak'}
+              </button>
+              {skipArmed && (
+                <div className="hard-skip-box">
+                  <b>Hard mode pause</b>
+                  <p>Do the two-minute entry first. If you still want to skip, write the reason and wait out the timer.</p>
+                  <label className="checkline">
+                    <input type="checkbox" checked={entryTried} onChange={e => setEntryTried(e.target.checked)} />
+                    <span>I tried the ugly 2-minute version.</span>
+                  </label>
+                  <textarea
+                    value={skipReason}
+                    onChange={e => setSkipReason(e.target.value)}
+                    placeholder="Real reason for skipping today..."
+                  />
+                  <div className="row" style={{ marginTop: 8 }}>
+                    <button
+                      className="btn sm sage"
+                      onClick={confirmHardSkip}
+                      disabled={busy || !entryTried || skipSeconds > 0 || skipReason.trim().length < 12}
+                    >
+                      {skipSeconds > 0 ? `Wait ${skipSeconds}s` : 'Confirm skip'}
+                    </button>
+                    <button className="btn sm ghost" onClick={() => setSkipArmed(false)} disabled={busy}>Cancel</button>
+                  </div>
+                </div>
+              )}
               <Chain series={progress?.series || []} />
             </div>
 
