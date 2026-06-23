@@ -231,7 +231,6 @@ function NextCardSpotlight({ task, doneCount, totalTasks, onMove }) {
         <h3>{task.title}</h3>
         <p>{task.detail}</p>
         <div className="next-card-meta">
-          <span className={`kind-tag kind-${task.kind}`}>{task.kind}</span>
           {task.minutes ? <span>{task.minutes} min</span> : null}
           <span>{doneCount}/{totalTasks} done</span>
         </div>
@@ -344,62 +343,28 @@ function CoachTools({ date, firstTaskTitle }) {
   );
 }
 
-function TaskCard({ task, onMove, onDragStart }) {
+function TaskCard({ task, onMove, index }) {
   return (
-    <div
-      className={`kanban-task ${task.done ? 'done' : ''}`}
-      draggable
-      onDragStart={() => onDragStart(task.id)}
-    >
+    <div className={`kanban-task ${task.done ? 'done' : ''}`}>
       <div className="task-head">
-        <span className={`kind-tag kind-${task.kind}`}>{task.kind}</span>
+        <span className="task-number">{task.done ? 'Done' : `Card ${index + 1}`}</span>
         {task.minutes ? <span className="min">{task.minutes} min</span> : null}
       </div>
       <div className="task-title">{task.title}</div>
       <p className="task-detail">{task.detail}</p>
       <div className="task-actions">
         {task.resource_url ? <a href={task.resource_url} target="_blank" rel="noreferrer">open resource</a> : <span />}
-        <button className="btn sm ghost" onClick={() => onMove(task.id)}>{task.done ? 'Move back' : 'Move done'}</button>
+        <button className="btn sm ghost" onClick={() => onMove(task.id)}>{task.done ? 'Undo' : 'Done'}</button>
       </div>
     </div>
   );
 }
 
-function TaskColumn({ title, hint, tasks, done, onDropTask, children }) {
+function TaskStack({ tasks, onMove }) {
   return (
-    <div
-      className={`kanban-column ${done ? 'done-column' : ''}`}
-      onDragOver={e => e.preventDefault()}
-      onDrop={() => onDropTask(done)}
-    >
-      <div className="column-head">
-        <h3>{title}</h3>
-        <span>{tasks.length}</span>
-      </div>
-      <p className="faint">{hint}</p>
-      <div className="kanban-list">
-        {tasks.length ? children : <div className="empty-drop">Drop cards here</div>}
-      </div>
-    </div>
-  );
-}
-
-function TaskListView({ tasks, onMove }) {
-  return (
-    <div className="task-list-view">
+    <div className="simple-task-stack">
       {tasks.map((task, index) => (
-        <div key={task.id} className={`task-row ${task.done ? 'done' : ''}`}>
-          <div className="task-status">{task.done ? 'Done' : `#${index + 1}`}</div>
-          <div className="task-row-main">
-            <div className="task-head">
-              <span className={`kind-tag kind-${task.kind}`}>{task.kind}</span>
-              {task.minutes ? <span className="min">{task.minutes} min</span> : null}
-            </div>
-            <div className="task-title">{task.title}</div>
-            <p className="task-detail">{task.detail}</p>
-          </div>
-          <button className="btn sm ghost" onClick={() => onMove(task.id)}>{task.done ? 'Move back' : 'Move done'}</button>
-        </div>
+        <TaskCard key={task.id} task={task} index={index} onMove={onMove} />
       ))}
     </div>
   );
@@ -411,11 +376,6 @@ export default function Today() {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
-  const [draggingId, setDraggingId] = useState(null);
-  const [boardView, setBoardView] = useState(() => {
-    const saved = localStorage.getItem('mentor-board-view');
-    return saved === 'list' ? 'list' : 'board';
-  });
   const [pushStyle, setPushStyle] = useState(() => {
     const saved = localStorage.getItem('mentor-push-style');
     return saved && PUSH_STYLES[saved] ? saved : 'easy';
@@ -434,15 +394,6 @@ export default function Today() {
 
   const [energy, setEnergy] = useState(null);
   const [mood, setMood] = useState(null);
-  const [hardThing, setHardThing] = useState('');
-  const [nextStep, setNextStep] = useState('');
-  const [tomorrowMinutes, setTomorrowMinutes] = useState('');
-  const [diaryMsg, setDiaryMsg] = useState('');
-  const [diaryBusy, setDiaryBusy] = useState(false);
-
-  useEffect(() => {
-    localStorage.setItem('mentor-board-view', boardView);
-  }, [boardView]);
 
   useEffect(() => {
     localStorage.setItem('mentor-push-style', pushStyle);
@@ -475,9 +426,6 @@ export default function Today() {
       if (t.log) {
         setEnergy(t.log.energy);
         setMood(t.log.mood);
-        setHardThing(t.log.what_felt_hard || '');
-        setNextStep(t.log.what_avoided || '');
-        setTomorrowMinutes(t.log.minutes_tomorrow ?? '');
       }
     } catch (e) {
       setErr(e.message);
@@ -519,13 +467,6 @@ export default function Today() {
     }
   }
 
-  function dropTask(done) {
-    const task = tasks.find(t => t.id === draggingId);
-    setDraggingId(null);
-    if (!task || task.done === done) return;
-    toggle(task.id);
-  }
-
   async function chooseMode(m) {
     setData(d => ({ ...d, day: { ...d.day, mode: m } }));
     try {
@@ -553,9 +494,9 @@ export default function Today() {
     setErr('');
     try {
       const minutes = day.mode === 'low' ? 20 : day.mode === 'full' ? 120 : 90;
-      const out = await api.replan({ date: day.the_date, energy, mood, minutes, recentNote: hardThing || nextStep });
+      const out = await api.replan({ date: day.the_date, energy, mood, minutes });
       setData(d => ({ ...d, tasks: out.tasks, day: { ...d.day, mode: out.mode || d.day.mode } }));
-      setMsg(out.message || 'Plan fitted inside this week. Anything left unfinished still comes back first tomorrow.');
+      setMsg(out.message || 'Updated the cards for today.');
     } catch (e) {
       const aiHint = e.message.includes('GROQ_API_KEY')
         ? 'AI coaching is not configured yet. Your original cards are still safe.'
@@ -564,26 +505,6 @@ export default function Today() {
       console.warn('[today] replan failed', e);
     }
     setBusy(false);
-  }
-
-  async function saveDiary() {
-    setDiaryBusy(true);
-    setDiaryMsg('');
-    setErr('');
-    try {
-      const minutes = tomorrowMinutes === '' ? null : Number(tomorrowMinutes);
-      await api.saveLog({
-        date: day.the_date,
-        what_felt_hard: hardThing,
-        what_avoided: nextStep,
-        minutes_tomorrow: Number.isFinite(minutes) ? minutes : null
-      });
-      setDiaryMsg('Saved. Tomorrow has a clearer starting point.');
-    } catch (e) {
-      setErr(`Could not save notes: ${e.message}`);
-      console.warn('[today] diary save failed', e);
-    }
-    setDiaryBusy(false);
   }
 
   async function finishDay(status) {
@@ -664,16 +585,12 @@ export default function Today() {
             <section className="board-card">
               <div className="board-header">
                 <div>
-                  <div className="eyebrow">{day.week_label || 'Plan'} - Day {day.day_index}</div>
-                  <h2>Today's sprint board</h2>
-                  <p className="muted">Start here. Do the cards in order, or switch to list view if you want a cleaner read.</p>
+                  <div className="eyebrow">Day {day.day_index}</div>
+                  <h2>Today</h2>
+                  <p className="muted">Do the first card. That is enough to make today real.</p>
                 </div>
                 <div className="board-controls">
-                  <div className="segmented" aria-label="Sprint board view">
-                    <button className={boardView === 'board' ? 'on' : ''} onClick={() => setBoardView('board')}>Board</button>
-                    <button className={boardView === 'list' ? 'on' : ''} onClick={() => setBoardView('list')}>List</button>
-                  </div>
-                  <button className="btn sm ghost" onClick={replan} disabled={busy}>{busy ? 'Fitting...' : 'Fit plan'}</button>
+                  <button className="btn sm ghost" onClick={replan} disabled={busy}>{busy ? 'Updating...' : 'Adjust cards'}</button>
                 </div>
               </div>
 
@@ -681,34 +598,7 @@ export default function Today() {
 
               <NextCardSpotlight task={nextTask} doneCount={doneCount} totalTasks={tasks.length} onMove={toggle} />
 
-              {boardView === 'board' ? (
-                <div className="kanban-board">
-                  <TaskColumn
-                    title="Plan"
-                    hint="Unfinished cards stay here and carry forward first tomorrow."
-                    tasks={todoTasks}
-                    done={false}
-                    onDropTask={dropTask}
-                  >
-                    {todoTasks.map(t => (
-                      <TaskCard key={t.id} task={t} onMove={toggle} onDragStart={setDraggingId} />
-                    ))}
-                  </TaskColumn>
-                  <TaskColumn
-                    title="Done"
-                    hint="Cards here are real evidence for the streak."
-                    tasks={doneTasks}
-                    done
-                    onDropTask={dropTask}
-                  >
-                    {doneTasks.map(t => (
-                      <TaskCard key={t.id} task={t} onMove={toggle} onDragStart={setDraggingId} />
-                    ))}
-                  </TaskColumn>
-                </div>
-              ) : (
-                <TaskListView tasks={[...todoTasks, ...doneTasks]} onMove={toggle} />
-              )}
+              <TaskStack tasks={[...todoTasks, ...doneTasks]} onMove={toggle} />
 
               <div className={`coach-strip ${coachLine.tone}`}>
                 <span>{coachLine.tag}</span>
@@ -734,59 +624,34 @@ export default function Today() {
                   onContract={setHardContract}
                   firstTaskTitle={firstTaskTitle}
                 />
+                <CoachTools date={day.the_date} firstTaskTitle={firstTaskTitle} />
               </details>
             </section>
 
             <section className="notes-cta-panel">
               <div>
                 <div className="label-row">
-                  <h3>Notebook is separate now</h3>
-                  <span className="faint">after each card</span>
+                  <h3>Notes</h3>
                 </div>
                 <p className="muted">
-                  Paste rough learning notes there. It keeps your original wording, then adds examples, corrections,
-                  and a test question without cluttering today's board.
+                  Paste rough learning notes after a card. Keep the work page clean.
                 </p>
               </div>
               <Link className="btn primary sm" to="/notes">Open notebook</Link>
-            </section>
-
-            <section className="note-panel reflection-panel">
-              <div className="label-row"><h3>Tomorrow handoff</h3><span className="faint">end-of-day</span></div>
-              <textarea
-                placeholder="What took the most energy today?"
-                value={hardThing}
-                onChange={e => setHardThing(e.target.value)}
-              />
-              <textarea
-                placeholder="What would make tomorrow easier?"
-                value={nextStep}
-                onChange={e => setNextStep(e.target.value)}
-                style={{ marginTop: 8 }}
-              />
-              <div className="row" style={{ marginTop: 10 }}>
-                <label className="mini-field">
-                  <span>Tomorrow minutes</span>
-                  <input type="number" min="5" max="180" value={tomorrowMinutes} onChange={e => setTomorrowMinutes(e.target.value)} placeholder="20" />
-                </label>
-                <button className="btn sage sm" onClick={saveDiary} disabled={diaryBusy}>{diaryBusy ? 'Saving...' : 'Save handoff'}</button>
-              </div>
-              {diaryMsg && <div className="toast">{diaryMsg}</div>}
             </section>
           </main>
 
           <aside className="today-rail">
             <div className="rail-panel">
-              <div className="label-row"><h3>Plan size</h3><span className="faint">{remainingCount} left</span></div>
+              <div className="label-row"><h3>Time</h3><span className="faint">{remainingCount} left</span></div>
               <div className="row">
                 {MODES.map(([m, label]) => (
                   <button key={m} className={`chip ${day.mode === m ? 'on' : ''}`} onClick={() => chooseMode(m)}>{label}</button>
                 ))}
               </div>
-              <p className="faint">Change size when the day changes. Use Fit plan only when the cards themselves need resizing.</p>
 
               <details className="inside-details compact">
-                <summary>Energy / mood check-in</summary>
+                <summary>Check-in</summary>
                 <div className="scale-row">
                   <span>Energy</span>
                   {[1, 2, 3, 4, 5].map(n => (
@@ -806,11 +671,11 @@ export default function Today() {
 
             <div className="rail-panel close-panel">
               <div className="label-row"><h3>Close the day</h3></div>
-              <p className="muted">The rule is strict now: no finished card, no streak point. Searching or opening the app does not count by itself.</p>
+              <p className="muted">Close after one card is done.</p>
               <button className="btn sage" onClick={() => finishDay('done')} disabled={busy || !canClose}>Close day</button>
               {!canClose && <p className="faint">Move one card to Done first.</p>}
               <button className="btn ghost" onClick={requestSkip} disabled={busy}>
-                {hardMode ? 'Try to skip' : 'Leave out of streak'}
+                {hardMode ? 'Try to skip' : 'Skip today'}
               </button>
               {skipArmed && (
                 <div className="hard-skip-box">
@@ -839,8 +704,6 @@ export default function Today() {
               )}
               <Chain series={progress?.series || []} />
             </div>
-
-            <CoachTools date={day.the_date} firstTaskTitle={firstTaskTitle} />
           </aside>
         </div>
       )}
