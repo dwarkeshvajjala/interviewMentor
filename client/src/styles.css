@@ -906,32 +906,48 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
   color: var(--text);
   box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset;
 }
-.plan-rules {
+.next-card-spotlight {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid rgba(244,185,91,0.42);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(244,185,91,0.10), transparent 46%),
+    var(--panel-wash);
+  padding: 14px;
+  margin-top: 10px;
 }
-.plan-rules > div {
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-sm);
-  background: var(--panel-wash);
-  padding: 10px;
+.next-card-spotlight.complete {
+  border-color: rgba(95,208,165,0.4);
+  background:
+    linear-gradient(135deg, rgba(95,208,165,0.10), transparent 46%),
+    var(--panel-wash);
 }
-.plan-rules span {
-  display: block;
-  color: var(--faint);
-  font-size: 11.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 4px;
+.next-card-copy h3 {
+  margin: 3px 0 5px;
+  font-family: var(--display);
+  font-size: 19px;
 }
-.plan-rules b {
-  display: block;
-  font-size: 12.5px;
-  font-weight: 600;
+.next-card-copy p {
+  margin: 0;
   color: var(--muted);
-  line-height: 1.4;
+  font-size: 13.5px;
+}
+.next-card-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  color: var(--faint);
+  font-size: 12px;
+}
+.next-card-actions {
+  display: grid;
+  gap: 8px;
+  min-width: 130px;
 }
 .discipline-panel {
   border: 1px solid rgba(95,208,165,0.28);
@@ -1048,6 +1064,24 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
   margin: 9px 0 0;
   color: var(--muted);
   font-size: 13px;
+}
+.discipline-drawer {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--panel-wash);
+  margin-top: 12px;
+  overflow: hidden;
+}
+.discipline-drawer summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 12px 14px;
+}
+.discipline-drawer .discipline-panel,
+.discipline-drawer .hard-mode-panel {
+  margin: 0 12px 12px;
+  box-shadow: none;
 }
 .kanban-board {
   display: grid;
@@ -1567,7 +1601,6 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
   .kanban-board,
   .notes-grid,
   .notebook-layout,
-  .plan-rules,
   .launch-top,
   .launch-grid {
     grid-template-columns: 1fr;
@@ -1578,9 +1611,13 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
   .today-hero,
   .notebook-hero,
   .board-header,
-  .notes-cta-panel {
+  .notes-cta-panel,
+  .next-card-spotlight {
     flex-direction: column;
     align-items: stretch;
+  }
+  .next-card-spotlight {
+    grid-template-columns: 1fr;
   }
   .board-controls {
     justify-items: stretch;

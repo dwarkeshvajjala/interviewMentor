@@ -160,8 +160,8 @@ function DisciplineLaunch({
     <div className={`discipline-panel style-${pushStyle}`}>
       <div className="launch-top">
         <div>
-          <div className="eyebrow">Behavior design</div>
-          <h3>Make the first card easy</h3>
+          <div className="eyebrow">Hard mode tools</div>
+          <h3>Make starting easier than quitting</h3>
           <p>
             Today's real minimum is one finished card. After that, the day has proof.
             Full sweep is a bonus, not the entry fee.
@@ -207,6 +207,39 @@ function DisciplineLaunch({
       <p className="push-line">
         {firstWin ? `Good. ${remainingCount} card${remainingCount === 1 ? '' : 's'} left if you want the sweep. ${reward ? `Reward: ${reward}` : ''}` : style.line}
       </p>
+    </div>
+  );
+}
+
+function NextCardSpotlight({ task, doneCount, totalTasks, onMove }) {
+  if (!task) {
+    return (
+      <div className="next-card-spotlight complete">
+        <div>
+          <div className="eyebrow">Sprint complete</div>
+          <h3>All cards are done.</h3>
+          <p>Close the day while the win is fresh. Tomorrow starts cleaner because of this.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="next-card-spotlight">
+      <div className="next-card-copy">
+        <div className="eyebrow">Start here</div>
+        <h3>{task.title}</h3>
+        <p>{task.detail}</p>
+        <div className="next-card-meta">
+          <span className={`kind-tag kind-${task.kind}`}>{task.kind}</span>
+          {task.minutes ? <span>{task.minutes} min</span> : null}
+          <span>{doneCount}/{totalTasks} done</span>
+        </div>
+      </div>
+      <div className="next-card-actions">
+        {task.resource_url && <a className="btn sm ghost" href={task.resource_url} target="_blank" rel="noreferrer">Open resource</a>}
+        <button className="btn primary" onClick={() => onMove(task.id)}>Mark done</button>
+      </div>
     </div>
   );
 }
@@ -372,25 +405,6 @@ function TaskListView({ tasks, onMove }) {
   );
 }
 
-function CarryoverExplainer({ remainingCount }) {
-  return (
-    <div className="plan-rules">
-      <div>
-        <span>Today</span>
-        <b>One finished card makes the day count.</b>
-      </div>
-      <div>
-        <span>Tomorrow</span>
-        <b>{remainingCount ? `${remainingCount} unfinished card${remainingCount === 1 ? '' : 's'} come back first.` : 'No unfinished cards to carry.'}</b>
-      </div>
-      <div>
-        <span>Fit plan</span>
-        <b>AI resizes today inside this week. It does not jump the roadmap.</b>
-      </div>
-    </div>
-  );
-}
-
 export default function Today() {
   const [data, setData] = useState(null);
   const [progress, setProgress] = useState({ series: [], streak: 0, totalPoints: 0 });
@@ -492,6 +506,7 @@ export default function Today() {
   const greeting = getTimeGreeting();
   const coachLine = getDailyCoachLine({ streak, doneCount, totalTasks: tasks.length });
   const firstTaskTitle = todoTasks[0]?.title || tasks[0]?.title || '';
+  const nextTask = todoTasks[0] || null;
 
   async function toggle(id) {
     setErr('');
@@ -664,23 +679,7 @@ export default function Today() {
 
               {msg && <div className="toast" style={{ marginBottom: 10 }}>{msg}</div>}
 
-              <DisciplineLaunch
-                doneCount={doneCount}
-                totalTasks={tasks.length}
-                remainingCount={remainingCount}
-                firstTaskTitle={firstTaskTitle}
-                pushStyle={pushStyle}
-                onPushStyle={setPushStyle}
-                reward={reward}
-                onReward={setReward}
-              />
-
-              <div className={`coach-strip ${coachLine.tone}`}>
-                <span>{coachLine.tag}</span>
-                <p>{coachLine.text}</p>
-              </div>
-
-              <CarryoverExplainer remainingCount={remainingCount} />
+              <NextCardSpotlight task={nextTask} doneCount={doneCount} totalTasks={tasks.length} onMove={toggle} />
 
               {boardView === 'board' ? (
                 <div className="kanban-board">
@@ -710,6 +709,32 @@ export default function Today() {
               ) : (
                 <TaskListView tasks={[...todoTasks, ...doneTasks]} onMove={toggle} />
               )}
+
+              <div className={`coach-strip ${coachLine.tone}`}>
+                <span>{coachLine.tag}</span>
+                <p>{coachLine.text}</p>
+              </div>
+
+              <details className="discipline-drawer">
+                <summary>Hard mode and motivation tools</summary>
+                <DisciplineLaunch
+                  doneCount={doneCount}
+                  totalTasks={tasks.length}
+                  remainingCount={remainingCount}
+                  firstTaskTitle={firstTaskTitle}
+                  pushStyle={pushStyle}
+                  onPushStyle={setPushStyle}
+                  reward={reward}
+                  onReward={setReward}
+                />
+                <HardModePanel
+                  enabled={hardMode}
+                  onToggle={setHardMode}
+                  contract={hardContract}
+                  onContract={setHardContract}
+                  firstTaskTitle={firstTaskTitle}
+                />
+              </details>
             </section>
 
             <section className="notes-cta-panel">
@@ -778,14 +803,6 @@ export default function Today() {
             </div>
 
             <FocusSprint date={day.the_date} mode={day.mode} />
-
-            <HardModePanel
-              enabled={hardMode}
-              onToggle={setHardMode}
-              contract={hardContract}
-              onContract={setHardContract}
-              firstTaskTitle={firstTaskTitle}
-            />
 
             <div className="rail-panel close-panel">
               <div className="label-row"><h3>Close the day</h3></div>
