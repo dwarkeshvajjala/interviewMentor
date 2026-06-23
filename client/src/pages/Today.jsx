@@ -13,6 +13,20 @@ const DEFAULT_PACT = {
   friction: 'Phone away until the first sprint is done.',
   reward: 'After the sprint: music, tea, a short walk, or one relaxed break.'
 };
+const PUSH_STYLES = {
+  easy: {
+    label: 'Easy',
+    line: 'Make it almost too small to refuse. Two clean minutes is a valid start.'
+  },
+  direct: {
+    label: 'Direct',
+    line: 'No big speech. Pick the first card, start the timer, and create evidence.'
+  },
+  navy: {
+    label: 'Navy',
+    line: 'One more clean rep before negotiation. The quit signal is information, not an order.'
+  }
+};
 
 function formatSprint(seconds) {
   const mins = Math.floor(seconds / 60);
@@ -127,6 +141,75 @@ function loadPact() {
   }
 }
 
+function DisciplineLaunch({
+  doneCount,
+  totalTasks,
+  remainingCount,
+  firstTaskTitle,
+  pushStyle,
+  onPushStyle,
+  reward,
+  onReward
+}) {
+  const style = PUSH_STYLES[pushStyle] || PUSH_STYLES.easy;
+  const percent = totalTasks ? Math.round((doneCount / totalTasks) * 100) : 0;
+  const firstWin = doneCount > 0;
+
+  return (
+    <div className={`discipline-panel style-${pushStyle}`}>
+      <div className="launch-top">
+        <div>
+          <div className="eyebrow">Behavior design</div>
+          <h3>Make the first card easy</h3>
+          <p>
+            Today's real minimum is one finished card. After that, the day has proof.
+            Full sweep is a bonus, not the entry fee.
+          </p>
+        </div>
+        <div className="finish-meter">
+          <div className="finish-number">{percent}%</div>
+          <div className="finish-track"><span style={{ width: `${percent}%` }} /></div>
+          <span>{doneCount}/{totalTasks} cards</span>
+        </div>
+      </div>
+
+      <div className="launch-grid">
+        <div className="launch-step">
+          <span>1</span>
+          <b>Two-minute entry</b>
+          <p>Open only this card: {firstTaskTitle || 'the first card'}.</p>
+        </div>
+        <div className="launch-step">
+          <span>2</span>
+          <b>If-then rescue</b>
+          <p>If attention drifts, do the 90-second reset and return to the same card.</p>
+        </div>
+        <div className="launch-step reward-step">
+          <span>3</span>
+          <b>{firstWin ? 'Reward unlocked' : 'Temptation bundle'}</b>
+          <input
+            value={reward}
+            onChange={e => onReward(e.target.value)}
+            placeholder="Tea, music, walk, snack..."
+          />
+        </div>
+      </div>
+
+      <div className="push-row">
+        <span>Coach voice</span>
+        {Object.entries(PUSH_STYLES).map(([key, item]) => (
+          <button key={key} className={`chip ${pushStyle === key ? 'on' : ''}`} onClick={() => onPushStyle(key)}>
+            {item.label}
+          </button>
+        ))}
+      </div>
+      <p className="push-line">
+        {firstWin ? `Good. ${remainingCount} card${remainingCount === 1 ? '' : 's'} left if you want the sweep. ${reward ? `Reward: ${reward}` : ''}` : style.line}
+      </p>
+    </div>
+  );
+}
+
 function CoachTools({ date, firstTaskTitle }) {
   const edge = getDailyEdge();
   const [pact, setPact] = useState(loadPact);
@@ -184,6 +267,12 @@ function CoachTools({ date, firstTaskTitle }) {
           ? `Locked: start with "${firstTaskTitle || 'the first card'}" before opening anything else.`
           : 'Locking the first move is just a small promise to future-you. Nothing dramatic, just less negotiation.'}
       </p>
+
+      <div className="rescue-stack">
+        <div><b>Too hard?</b><span>Do the ugly two-minute version.</span></div>
+        <div><b>Distracted?</b><span>Reset, stand up, come back to the same card.</span></div>
+        <div><b>Almost done?</b><span>Use the one-more-rep rule before you stop.</span></div>
+      </div>
 
       <details className="inside-details">
         <summary>Edit setup rule</summary>
@@ -287,6 +376,13 @@ export default function Today() {
     const saved = localStorage.getItem('mentor-board-view');
     return saved === 'list' ? 'list' : 'board';
   });
+  const [pushStyle, setPushStyle] = useState(() => {
+    const saved = localStorage.getItem('mentor-push-style');
+    return saved && PUSH_STYLES[saved] ? saved : 'easy';
+  });
+  const [reward, setReward] = useState(() => (
+    localStorage.getItem('mentor-first-card-reward') || 'Tea, music, or a short walk after the first card.'
+  ));
 
   const [energy, setEnergy] = useState(null);
   const [mood, setMood] = useState(null);
@@ -299,6 +395,14 @@ export default function Today() {
   useEffect(() => {
     localStorage.setItem('mentor-board-view', boardView);
   }, [boardView]);
+
+  useEffect(() => {
+    localStorage.setItem('mentor-push-style', pushStyle);
+  }, [pushStyle]);
+
+  useEffect(() => {
+    localStorage.setItem('mentor-first-card-reward', reward);
+  }, [reward]);
 
   async function load() {
     try {
@@ -488,6 +592,17 @@ export default function Today() {
               </div>
 
               {msg && <div className="toast" style={{ marginBottom: 10 }}>{msg}</div>}
+
+              <DisciplineLaunch
+                doneCount={doneCount}
+                totalTasks={tasks.length}
+                remainingCount={remainingCount}
+                firstTaskTitle={firstTaskTitle}
+                pushStyle={pushStyle}
+                onPushStyle={setPushStyle}
+                reward={reward}
+                onReward={setReward}
+              />
 
               <div className={`coach-strip ${coachLine.tone}`}>
                 <span>{coachLine.tag}</span>

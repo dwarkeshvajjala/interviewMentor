@@ -933,6 +933,122 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
   color: var(--muted);
   line-height: 1.4;
 }
+.discipline-panel {
+  border: 1px solid rgba(95,208,165,0.28);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(95,208,165,0.08), transparent 46%),
+    var(--panel-wash);
+  padding: 14px;
+  margin-top: 12px;
+}
+.discipline-panel.style-navy {
+  border-color: rgba(251,139,139,0.34);
+  background:
+    linear-gradient(135deg, rgba(251,139,139,0.08), transparent 46%),
+    var(--panel-wash);
+}
+.launch-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 140px;
+  gap: 14px;
+  align-items: start;
+}
+.launch-top h3 {
+  margin: 3px 0 5px;
+  font-family: var(--display);
+  font-size: 18px;
+}
+.launch-top p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+.finish-meter {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  padding: 10px;
+}
+.finish-number {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1;
+}
+.finish-track {
+  height: 8px;
+  border-radius: 99px;
+  overflow: hidden;
+  background: var(--bg-2);
+  border: 1px solid var(--border-soft);
+  margin: 9px 0 6px;
+}
+.finish-track span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--amber), var(--sage));
+  transition: width .2s ease;
+}
+.finish-meter span {
+  color: var(--faint);
+  font-size: 12px;
+}
+.launch-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+.launch-step {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  padding: 10px;
+}
+.launch-step > span {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--amber-dim);
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+.launch-step b {
+  display: block;
+  font-size: 13.5px;
+}
+.launch-step p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.reward-step input {
+  margin-top: 7px;
+  padding: 7px 9px;
+  font-size: 12.5px;
+}
+.push-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.push-row > span {
+  color: var(--faint);
+  font-size: 12.5px;
+  margin-right: 2px;
+}
+.push-line {
+  margin: 9px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
 .kanban-board {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(260px, 0.75fr);
@@ -1160,6 +1276,28 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
   gap: 8px;
   margin-top: 10px;
 }
+.rescue-stack {
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+}
+.rescue-stack > div {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--panel-wash);
+  padding: 8px 9px;
+}
+.rescue-stack b {
+  display: block;
+  color: var(--text);
+  font-size: 12.5px;
+}
+.rescue-stack span {
+  display: block;
+  color: var(--faint);
+  font-size: 12px;
+  margin-top: 1px;
+}
 .note-link {
   display: block;
   margin-top: 12px;
@@ -1363,7 +1501,9 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
   .kanban-board,
   .notes-grid,
   .notebook-layout,
-  .plan-rules {
+  .plan-rules,
+  .launch-top,
+  .launch-grid {
     grid-template-columns: 1fr;
   }
   .today-rail {
@@ -1409,6 +1549,9 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
     position: static;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .launch-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 /* ---------- small screen tweaks ---------- */
@@ -1423,6 +1566,7 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
   .sprint-actions { justify-items: start; }
   .diary-grid,
   .pact-grid,
+  .launch-grid,
   .reset-layout,
   .reflection-row { grid-template-columns: 1fr; }
   .momentum-stats, .mini-field { width: 100%; min-width: 0; }
