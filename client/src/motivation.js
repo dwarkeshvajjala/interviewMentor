@@ -108,7 +108,7 @@ const worldTechniques = [
   {
     origin: 'Japan · Kaizen',
     name: 'Smallest useful step',
-    tip: "What version of today's task is so small it'd be embarrassing not to do? Start there. Small starts beat big intentions every single time."
+    tip: "What version of today's task feels easy enough to begin right now? Start there. Small starts beat big intentions every single time."
   },
   {
     origin: 'Soviet sports psychology · A.C. Puni',

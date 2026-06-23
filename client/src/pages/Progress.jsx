@@ -58,7 +58,7 @@ function ProgressCalendar({ series }) {
         <span><i className="swatch normal" />normal</span>
         <span><i className="swatch low" />low</span>
         <span><i className="swatch rest" />rest</span>
-        <span><i className="swatch missed" />missed</span>
+        <span><i className="swatch missed" />open</span>
       </div>
     </div>
   );
@@ -112,7 +112,7 @@ export default function Progress() {
         <div className="momentum-stats">
           <span><b>{weeklyPoints}</b> pts this week</span>
           <span><b>{p.daysEngaged}</b> show-ups</span>
-          <span><b>{p.missedDays || 0}</b> misses</span>
+          <span><b>{p.missedDays || 0}</b> open days</span>
         </div>
       </div>
 
@@ -135,7 +135,7 @@ export default function Progress() {
         <div className="stat"><div className="n" style={{ color: 'var(--sage)' }}>{p.streak}</div><div className="k">current chain (days)</div></div>
         <div className="stat"><div className="n" style={{ color: 'var(--amber)' }}>{p.totalPoints}</div><div className="k">total points</div></div>
         <div className="stat"><div className="n">{p.daysEngaged}</div><div className="k">days kept alive</div></div>
-        <div className="stat"><div className="n">{p.missedDays || 0}</div><div className="k">missed / skipped days</div></div>
+        <div className="stat"><div className="n">{p.missedDays || 0}</div><div className="k">open / skipped days</div></div>
         <div className="stat"><div className="n">{p.canAnswer}/{p.questionsCount}</div><div className="k">questions you can answer</div></div>
       </div>
 

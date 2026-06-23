@@ -135,7 +135,7 @@ function AppCard({ app, onUpdate, onDelete }) {
           </div>
           <label className="field-block" style={{ marginBottom: 8 }}>
             <span>Questions they asked</span>
-            <textarea value={form.questions_asked || ''} onChange={e => up('questions_asked', e.target.value)} style={{ minHeight: 80 }} placeholder="Write what they asked — you'll need this to patch weak spots" />
+            <textarea value={form.questions_asked || ''} onChange={e => up('questions_asked', e.target.value)} style={{ minHeight: 80 }} placeholder="Write what they asked — this helps plan the next pass" />
           </label>
           <label className="field-block" style={{ marginBottom: 10 }}>
             <span>Outcome / notes</span>
@@ -252,7 +252,7 @@ export default function Applications() {
       {/* Rule reminder */}
       <div className="card" style={{ marginBottom: 14, padding: '12px 14px', background: 'var(--panel-wash)', borderColor: 'var(--border-soft)' }}>
         <p className="faint" style={{ margin: 0, fontSize: 12.5 }}>
-          Rule: every interview is practice data. Write questions asked within 30 minutes after. Patch the weak area within 48 hours.
+          Rule: every interview is practice data. Write questions asked within 30 minutes after. Plan the next pass within 48 hours.
         </p>
       </div>
 

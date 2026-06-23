@@ -14,29 +14,27 @@ const DEFAULT_PACT = {
   reward: 'After the sprint: music, tea, a short walk, or one relaxed break.'
 };
 
+function formatSprint(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = String(seconds % 60).padStart(2, '0');
+  return `${mins}:${secs}`;
+}
+
 function Chain({ series }) {
-  const recent = (series || []).slice(-21);
-  if (!recent.length) {
-    return <div className="chain-label">Your chain starts with the next small close.</div>;
-  }
+  const recent = (series || []).slice(-14);
+  if (!recent.length) return <div className="chain-label">Your chain starts with the next finished card.</div>;
   const alive = recent.filter(s => s.points > 0).length;
   return (
-    <div className="chain-wrap">
+    <div className="chain-wrap compact">
       <div className="chain">
         {recent.map((s, i) => {
           const cls = s.points === 0 ? (s.status === 'rest' ? 'rest' : '') : s.mode;
           return <span key={i} className={`link ${cls}`} title={`${s.date} - ${s.status}`} />;
         })}
       </div>
-      <div className="chain-label"><b>{alive}</b> days kept alive</div>
+      <div className="chain-label"><b>{alive}</b> recent wins</div>
     </div>
   );
-}
-
-function formatSprint(seconds) {
-  const mins = Math.floor(seconds / 60);
-  const secs = String(seconds % 60).padStart(2, '0');
-  return `${mins}:${secs}`;
 }
 
 function FocusSprint({ date, mode }) {
@@ -93,61 +91,27 @@ function FocusSprint({ date, mode }) {
     setCompleted(false);
   }
 
-  function reset() {
-    setSecondsLeft(target * 60);
-    setRunning(false);
-    setCompleted(false);
-  }
-
   const progress = Math.min(100, Math.max(0, 100 - (secondsLeft / (target * 60)) * 100));
-  const copy = completed
-    ? 'Sprint complete. That is a real vote for the person you are building.'
-    : running
-      ? 'Stay here. One tab, one rep, one promise.'
-      : 'Start a tiny sprint before your brain starts negotiating.';
 
   return (
-    <div className={`card focus-sprint ${running ? 'running' : ''} ${completed ? 'complete' : ''}`}>
+    <div className={`rail-panel sprint-panel ${running ? 'running' : ''}`}>
       <div className="label-row">
-        <h3>Focus sprint</h3>
-        <span className="faint">keep the site open, keep the promise</span>
+        <h3>Focus timer</h3>
+        <span className="faint">{target}m</span>
       </div>
-      <div className="sprint-body">
-        <div>
-          <div className="sprint-time">{formatSprint(secondsLeft)}</div>
-          <p className="muted" style={{ margin: '4px 0 0' }}>{copy}</p>
-        </div>
-        <div className="sprint-actions">
-          <div className="row">
-            {[10, 20, 45].map(minutes => (
-              <button key={minutes} className={`chip ${target === minutes ? 'on' : ''}`} onClick={() => chooseTarget(minutes)}>
-                {minutes}m
-              </button>
-            ))}
-          </div>
-          <div className="row">
-            <button className="btn primary" onClick={() => setRunning(!running)}>
-              {running ? 'Pause' : completed ? 'Again' : 'Start'}
-            </button>
-            <button className="btn ghost" onClick={reset}>Reset</button>
-          </div>
-        </div>
-      </div>
+      <div className="sprint-time small">{formatSprint(secondsLeft)}</div>
       <div className="sprint-track"><span style={{ width: `${progress}%` }} /></div>
-    </div>
-  );
-}
-
-function DailyEdge() {
-  const edge = getDailyEdge();
-  return (
-    <div className="card edge-card">
-      <div className="label-row">
-        <h3>Today's edge</h3>
-        <span className="faint edge-origin">{edge.origin}</span>
+      <div className="row" style={{ marginTop: 10 }}>
+        {[10, 20, 45].map(minutes => (
+          <button key={minutes} className={`chip ${target === minutes ? 'on' : ''}`} onClick={() => chooseTarget(minutes)}>
+            {minutes}
+          </button>
+        ))}
       </div>
-      <div className="edge-name">{edge.name}</div>
-      <p className="muted" style={{ margin: '6px 0 0', fontSize: 13.5 }}>{edge.tip}</p>
+      <div className="row" style={{ marginTop: 10 }}>
+        <button className="btn primary sm" onClick={() => setRunning(!running)}>{running ? 'Pause' : completed ? 'Again' : 'Start'}</button>
+        <button className="btn ghost sm" onClick={() => { setSecondsLeft(target * 60); setRunning(false); setCompleted(false); }}>Reset</button>
+      </div>
     </div>
   );
 }
@@ -163,9 +127,11 @@ function loadPact() {
   }
 }
 
-function DisciplinePact({ date }) {
+function OptionalTools({ date }) {
+  const edge = getDailyEdge();
   const [pact, setPact] = useState(loadPact);
   const [locked, setLocked] = useState(() => localStorage.getItem(`mentor-pact-locked-${date}`) === 'true');
+  const [secondsLeft, setSecondsLeft] = useState(0);
 
   useEffect(() => {
     localStorage.setItem('mentor-discipline-pact-v1', JSON.stringify(pact));
@@ -174,6 +140,12 @@ function DisciplinePact({ date }) {
   useEffect(() => {
     setLocked(localStorage.getItem(`mentor-pact-locked-${date}`) === 'true');
   }, [date]);
+
+  useEffect(() => {
+    if (secondsLeft <= 0) return undefined;
+    const timer = window.setInterval(() => setSecondsLeft(s => Math.max(s - 1, 0)), 1000);
+    return () => window.clearInterval(timer);
+  }, [secondsLeft]);
 
   function update(key, value) {
     setPact(prev => ({ ...prev, [key]: value }));
@@ -186,92 +158,70 @@ function DisciplinePact({ date }) {
   }
 
   return (
-    <div className={`card pact-card ${locked ? 'locked' : ''}`}>
-      <div className="label-row">
-        <h3>Daily game plan</h3>
-        <button className={`btn sm ${locked ? 'sage' : 'ghost'}`} onClick={lockToday}>
-          {locked ? 'Plan locked' : 'Lock plan'}
-        </button>
+    <details className="rail-details">
+      <summary>Optional tools</summary>
+      <div className="tool-block">
+        <div className="faint">{edge.origin}</div>
+        <b>{edge.name}</b>
+        <p className="muted">{edge.tip}</p>
       </div>
-      <div className="pact-grid">
-        <label className="field-block">
-          <span>Wish</span>
-          <input value={pact.wish} onChange={e => update('wish', e.target.value)} />
-        </label>
-        <label className="field-block">
-          <span>Outcome</span>
-          <input value={pact.outcome} onChange={e => update('outcome', e.target.value)} />
-        </label>
-        <label className="field-block">
-          <span>Likely friction</span>
-          <textarea value={pact.obstacle} onChange={e => update('obstacle', e.target.value)} />
-        </label>
-        <label className="field-block">
-          <span>If-then plan</span>
-          <textarea value={pact.plan} onChange={e => update('plan', e.target.value)} />
-        </label>
+      <div className="tool-block">
+        <div className="label-row">
+          <h3>Setup rule</h3>
+          <button className={`btn sm ${locked ? 'sage' : 'ghost'}`} onClick={lockToday}>
+            {locked ? 'Locked' : 'Lock'}
+          </button>
+        </div>
+        <label className="field-block"><span>Wish</span><input value={pact.wish} onChange={e => update('wish', e.target.value)} /></label>
+        <label className="field-block"><span>If-then plan</span><textarea value={pact.plan} onChange={e => update('plan', e.target.value)} /></label>
       </div>
-      <div className="pact-rules">
-        <label className="field-block">
-          <span>Friction rule</span>
-          <input value={pact.friction} onChange={e => update('friction', e.target.value)} />
-        </label>
-        <label className="field-block">
-          <span>Small reward</span>
-          <input value={pact.reward} onChange={e => update('reward', e.target.value)} />
-        </label>
+      <div className="tool-block">
+        <div className="label-row">
+          <h3>90-second reset</h3>
+          <span className="faint">{secondsLeft > 0 ? formatSprint(secondsLeft) : 'ready'}</span>
+        </div>
+        <p className="muted">For crowded moments: breathe, stand up, then return to the first card.</p>
+        <button className="btn ghost sm" onClick={() => setSecondsLeft(90)}>{secondsLeft > 0 ? 'Restart' : 'Start reset'}</button>
       </div>
-      <p className="faint" style={{ margin: '10px 0 0' }}>
-        Keep the plan easy to start: lower the size when needed, keep the promise.
-      </p>
+    </details>
+  );
+}
+
+function TaskCard({ task, onMove, onDragStart }) {
+  return (
+    <div
+      className={`kanban-task ${task.done ? 'done' : ''}`}
+      draggable
+      onDragStart={() => onDragStart(task.id)}
+    >
+      <div className="task-head">
+        <span className={`kind-tag kind-${task.kind}`}>{task.kind}</span>
+        {task.minutes ? <span className="min">{task.minutes} min</span> : null}
+      </div>
+      <div className="task-title">{task.title}</div>
+      <p className="task-detail">{task.detail}</p>
+      <div className="task-actions">
+        {task.resource_url ? <a href={task.resource_url} target="_blank" rel="noreferrer">open resource</a> : <span />}
+        <button className="btn sm ghost" onClick={() => onMove(task.id)}>{task.done ? 'Move back' : 'Move done'}</button>
+      </div>
     </div>
   );
 }
 
-function CalmReset() {
-  const [secondsLeft, setSecondsLeft] = useState(0);
-  const [done, setDone] = useState(false);
-
-  useEffect(() => {
-    if (secondsLeft <= 0) return undefined;
-    const timer = window.setInterval(() => setSecondsLeft(s => Math.max(s - 1, 0)), 1000);
-    return () => window.clearInterval(timer);
-  }, [secondsLeft]);
-
-  useEffect(() => {
-    if (secondsLeft === 0 && done) setDone(false);
-  }, [secondsLeft, done]);
-
-  function start() {
-    setSecondsLeft(90);
-    setDone(true);
-  }
-
-  const active = secondsLeft > 0;
-
+function TaskColumn({ title, hint, tasks, done, onDropTask, children }) {
   return (
-    <div className={`card reset-card ${active ? 'active' : ''}`}>
-      <div className="label-row">
-        <h3>90-second reset</h3>
-        <span className="faint">for noisy moments</span>
+    <div
+      className={`kanban-column ${done ? 'done-column' : ''}`}
+      onDragOver={e => e.preventDefault()}
+      onDrop={() => onDropTask(done)}
+    >
+      <div className="column-head">
+        <h3>{title}</h3>
+        <span>{tasks.length}</span>
       </div>
-      <div className="reset-layout">
-        <div>
-          <div className="reset-timer">{active ? formatSprint(secondsLeft) : '90s'}</div>
-          <p className="muted" style={{ margin: '4px 0 0' }}>
-            {active ? 'Breathe slowly. Let the moment pass, then choose the next small action.' : 'When your mind feels crowded, start here before deciding anything.'}
-          </p>
-        </div>
-        <ol className="reset-steps">
-          <li>Name the moment: "I need a reset."</li>
-          <li>Breathe: 4 seconds in, 6 seconds out.</li>
-          <li>Move: 10 squats, pushups, or a one-minute walk.</li>
-          <li>Open the first task and do a 10-minute sprint.</li>
-        </ol>
-      </div>
-      <div className="row" style={{ marginTop: 12 }}>
-        <button className="btn primary" onClick={start}>{active ? 'Restart reset' : 'Start reset'}</button>
-        <button className="btn ghost" onClick={() => setSecondsLeft(0)}>I am back</button>
+      <p className="faint">{hint}</p>
+      <div className="kanban-list">
+        {tasks.length ? children : <div className="empty-drop">Drop cards here</div>}
       </div>
     </div>
   );
@@ -283,11 +233,12 @@ export default function Today() {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
+  const [draggingId, setDraggingId] = useState(null);
 
   const [energy, setEnergy] = useState(null);
   const [mood, setMood] = useState(null);
   const [hardThing, setHardThing] = useState('');
-  const [avoidedThing, setAvoidedThing] = useState('');
+  const [nextStep, setNextStep] = useState('');
   const [tomorrowMinutes, setTomorrowMinutes] = useState('');
   const [diaryMsg, setDiaryMsg] = useState('');
   const [diaryBusy, setDiaryBusy] = useState(false);
@@ -311,10 +262,12 @@ export default function Today() {
         setEnergy(t.log.energy);
         setMood(t.log.mood);
         setHardThing(t.log.what_felt_hard || '');
-        setAvoidedThing(t.log.what_avoided || '');
+        setNextStep(t.log.what_avoided || '');
         setTomorrowMinutes(t.log.minutes_tomorrow ?? '');
       }
-    } catch (e) { setErr(e.message); }
+    } catch (e) {
+      setErr(e.message);
+    }
   }
   useEffect(() => { load(); }, []);
 
@@ -328,18 +281,41 @@ export default function Today() {
 
   const { day, tasks, plan } = data;
   const beforeStart = plan?.beforeStart;
-  const doneCount = tasks.filter(t => t.done).length;
-  const remainingCount = Math.max(tasks.length - doneCount, 0);
+  const todoTasks = tasks.filter(t => !t.done);
+  const doneTasks = tasks.filter(t => t.done);
+  const doneCount = doneTasks.length;
+  const remainingCount = todoTasks.length;
+  const canClose = doneCount > 0;
+  const today = new Date(day.the_date + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+  const streak = progress?.streak || 0;
+  const greeting = getTimeGreeting();
+  const coachLine = getDailyCoachLine({ streak, doneCount, totalTasks: tasks.length });
 
   async function toggle(id) {
     setErr('');
     setData(d => ({ ...d, tasks: d.tasks.map(t => t.id === id ? { ...t, done: !t.done } : t) }));
-    try { await api.toggleTask(id); } catch (e) { setErr(e.message); load(); }
+    try {
+      await api.toggleTask(id);
+    } catch (e) {
+      setErr(e.message);
+      load();
+    }
+  }
+
+  function dropTask(done) {
+    const task = tasks.find(t => t.id === draggingId);
+    setDraggingId(null);
+    if (!task || task.done === done) return;
+    toggle(task.id);
   }
 
   async function chooseMode(m) {
     setData(d => ({ ...d, day: { ...d.day, mode: m } }));
-    try { await api.setMode(day.the_date, m); } catch (e) { setErr(`Could not save mode: ${e.message}`); }
+    try {
+      await api.setMode(day.the_date, m);
+    } catch (e) {
+      setErr(`Could not save mode: ${e.message}`);
+    }
   }
 
   async function setScale(kind, val) {
@@ -386,233 +362,196 @@ export default function Today() {
   }
 
   async function saveDiary() {
-    setDiaryBusy(true);
-    setDiaryMsg('');
-    setErr('');
+    setDiaryBusy(true); setDiaryMsg(''); setErr('');
     try {
       const minutes = tomorrowMinutes === '' ? null : Number(tomorrowMinutes);
       await api.saveLog({
         date: day.the_date,
         what_felt_hard: hardThing,
-        what_avoided: avoidedThing,
+        what_avoided: nextStep,
         minutes_tomorrow: Number.isFinite(minutes) ? minutes : null
       });
       setDiaryMsg('Saved. Tomorrow has a clearer starting point.');
     } catch (e) {
-      setErr(`Could not save diary: ${e.message}`);
+      setErr(`Could not save notes: ${e.message}`);
       console.warn('[today] diary save failed', e);
     }
     setDiaryBusy(false);
   }
 
   async function finishDay(status) {
+    if (status === 'done' && !canClose) {
+      setErr('Move at least one task card to Done before closing the day.');
+      return;
+    }
     setBusy(true); setErr('');
     try {
       await api.setStatus(day.the_date, status);
-      setMsg(status === 'done' ? 'Day marked done. Chain alive.' : status === 'rest' ? 'Rest day logged. No guilt.' : 'Logged.');
+      setMsg(status === 'done'
+        ? 'Day closed. The streak only counted because a task card was done.'
+        : 'Today is left out of the streak. Tomorrow will stay simple.');
       const p = await api.progress().catch(() => ({ series: [] }));
       setProgress(p || { series: [] });
-    } catch (e) { setErr(e.message); }
+    } catch (e) {
+      setErr(e.message);
+    }
     setBusy(false);
   }
 
-  const today = new Date(day.the_date + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
-  const streak = progress?.streak || 0;
-  const greeting = getTimeGreeting();
-  const coachLine = getDailyCoachLine({ streak, doneCount, totalTasks: tasks.length });
-
   return (
-    <div className="fade-in">
+    <div className="today-page fade-in">
       {err && (
-        <div className="card" style={{ borderColor: '#5a342f', marginBottom: 14 }}>
+        <div className="notice error" style={{ marginBottom: 14 }}>
           <div className="row" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div className="error" style={{ margin: 0 }}>{err}</div>
+            <span>{err}</span>
             <button className="btn sm ghost" onClick={() => setErr('')}>Dismiss</button>
           </div>
         </div>
       )}
-      <div className="card hero-card">
-        <div className="hero-top">
-          <div>
-            <div className="eyebrow">{greeting.label} - {day.week_label || 'Plan'}{!beforeStart && ` - Day ${day.day_index}`}</div>
-            <h1 className="day-title">{greeting.title}</h1>
-            <p className="focus">{greeting.line}</p>
-          </div>
-          {!beforeStart && (
-            <div className="streak-badge">
-              <span>{streak}</span>
-              <small>day streak</small>
-            </div>
-          )}
-        </div>
-        <div className={`coach-strip ${coachLine.tone}`}>
-          <span>{coachLine.tag}</span>
-          <p>{coachLine.text}</p>
-        </div>
-        <div className="day-focus">
-          <span>{today}</span>
-          <b>{day.focus}</b>
+
+      <section className="today-hero">
+        <div>
+          <div className="eyebrow">{greeting.label} - {today}</div>
+          <h1 className="day-title">{greeting.title}</h1>
+          <p className="focus">{day.focus}</p>
         </div>
         {!beforeStart && (
-          <div className="today-summary">
-            <div>
-              <span className="summary-number">{doneCount}</span>
-              <span className="summary-label">done</span>
-            </div>
-            <div>
-              <span className="summary-number">{remainingCount}</span>
-              <span className="summary-label">left</span>
-            </div>
-            <div>
-              <span className="summary-number">{day.mode}</span>
-              <span className="summary-label">mode</span>
-            </div>
+          <div className="hero-metrics">
+            <div><b>{doneCount}/{tasks.length}</b><span>cards done</span></div>
+            <div><b>{streak}</b><span>day streak</span></div>
           </div>
         )}
-        <Chain series={progress?.series || []} />
-      </div>
+      </section>
 
       {beforeStart ? (
-        <InlineNotice tone="warn">Your 90-day plan begins on its start date. Update <code>PLAN_START_DATE</code> in the backend <code>.env</code> if you want to begin today.</InlineNotice>
+        <InlineNotice tone="warn">Your 90-day plan begins on its start date. Update <code>PLAN_START_DATE</code> if you want to begin today.</InlineNotice>
       ) : (
-        <>
-          <div className="card">
-            <div className="label-row">
-              <h3>Today's mode</h3>
-              <span className="faint">{doneCount}/{tasks.length} done</span>
-            </div>
-            <div className="row">
-              {MODES.map(([m, label]) => (
-                <button key={m} className={`chip ${day.mode === m ? 'on' : ''}`} onClick={() => chooseMode(m)}>{label}</button>
-              ))}
-            </div>
-
-            <div className="divider" />
-
-            <div className="label-row"><h3>How are you today?</h3></div>
-            <div className="row" style={{ marginBottom: 8 }}>
-              <span className="faint" style={{ width: 58 }}>Energy</span>
-              {[1, 2, 3, 4, 5].map(n => (
-                <button key={n} className={`chip scale ${energy === n ? 'on' : ''}`} onClick={() => setScale('energy', n)}>{n}</button>
-              ))}
-            </div>
-            <div className="row">
-              <span className="faint" style={{ width: 58 }}>Mood</span>
-              {[1, 2, 3, 4, 5].map(n => (
-                <button key={n} className={`chip scale ${mood === n ? 'on' : ''}`} onClick={() => setScale('mood', n)}>{n}</button>
-              ))}
-            </div>
-          </div>
-
-          <DisciplinePact date={day.the_date} />
-
-          <DailyEdge />
-
-          <CalmReset />
-
-          <FocusSprint date={day.the_date} mode={day.mode} />
-
-          <div className="card">
-            <div className="label-row">
-              <h3>Three things</h3>
-              <button className="btn sm ghost" onClick={replan} disabled={busy}>{busy ? 'Re-planning...' : 'Re-plan with AI'}</button>
-            </div>
-
-            {msg && <div className="toast" style={{ marginBottom: 10 }}>{msg}</div>}
-
-            {tasks.length === 0 && <InlineNotice tone="warn">No tasks for today. Try re-planning, or it may be a review day.</InlineNotice>}
-
-            {tasks.map(t => (
-              <div key={t.id} className={`task ${t.done ? 'done' : ''}`} onClick={() => toggle(t.id)}>
-                <div className="check">{'\u2713'}</div>
-                <div style={{ flex: 1 }}>
-                  <span className={`kind-tag kind-${t.kind}`}>{t.kind}</span>
-                  <div className="task-title">{t.title}</div>
-                  <p className="task-detail">{t.detail}</p>
-                  <div className="task-meta">
-                    {t.minutes ? <span className="min">{t.minutes} min</span> : null}
-                    {t.resource_url ? <a href={t.resource_url} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()}>open resource</a> : null}
-                  </div>
+        <div className="today-layout">
+          <main className="today-main">
+            <section className="board-card">
+              <div className="board-header">
+                <div>
+                  <div className="eyebrow">{day.week_label || 'Plan'} - Day {day.day_index}</div>
+                  <h2>Today's sprint board</h2>
+                  <p className="muted">Your first job is simple: move one card to Done. If a day is left open, unfinished cards come first tomorrow.</p>
                 </div>
+                <button className="btn sm ghost" onClick={replan} disabled={busy}>{busy ? 'Re-planning...' : 'Re-plan'}</button>
               </div>
-            ))}
-          </div>
-
-          <div className="card">
-            <div className="label-row"><h3>Paste what you learned</h3></div>
-            <p className="faint" style={{ marginTop: -4, marginBottom: 10 }}>Notes, an answer you wrote, anything. You'll get quick feedback and a question to test yourself.</p>
-            <input placeholder="Topic (optional) - e.g. INNER JOIN" value={noteTopic} onChange={e => setNoteTopic(e.target.value)} style={{ marginBottom: 8 }} />
-            <textarea placeholder="Type or paste here..." value={note} onChange={e => setNote(e.target.value)} />
-            <div className="row" style={{ marginTop: 10 }}>
-              <button className="btn primary" onClick={sendNote} disabled={noteBusy || !note.trim()}>{noteBusy ? 'Saving...' : 'Get feedback'}</button>
-              {speech.supported && (
-                <button className={`btn ghost ${speech.listening ? 'listening' : ''}`} onClick={speech.toggle}>
-                  {speech.listening ? 'Stop dictation' : 'Dictate note'}
-                </button>
-              )}
-            </div>
-            {feedback && (
-              <div className="ai-box">
-                <div className="who">Coach</div>
-                <div>{feedback.ai_feedback || 'Saved. (AI feedback unavailable - check GROQ_API_KEY.)'}</div>
-                {feedback.follow_up && <div className="follow">Test yourself: {feedback.follow_up}</div>}
-                {feedback.restudy_flag && <div className="restudy" style={{ marginTop: 8 }}>Worth a re-study before moving on.</div>}
+              {msg && <div className="toast" style={{ marginBottom: 10 }}>{msg}</div>}
+              <div className="coach-strip steady">
+                <span>{coachLine.tag}</span>
+                <p>{coachLine.text}</p>
               </div>
-            )}
-          </div>
+              <div className="kanban-board">
+                <TaskColumn
+                  title="Plan"
+                  hint="Do these in order. Drag or use the button."
+                  tasks={todoTasks}
+                  done={false}
+                  onDropTask={dropTask}
+                >
+                  {todoTasks.map(t => (
+                    <TaskCard key={t.id} task={t} onMove={toggle} onDragStart={setDraggingId} />
+                  ))}
+                </TaskColumn>
+                <TaskColumn
+                  title="Done"
+                  hint="Only cards here can close the day."
+                  tasks={doneTasks}
+                  done
+                  onDropTask={dropTask}
+                >
+                  {doneTasks.map(t => (
+                    <TaskCard key={t.id} task={t} onMove={toggle} onDragStart={setDraggingId} />
+                  ))}
+                </TaskColumn>
+              </div>
+            </section>
 
-          <div className="card diary-card">
-            <div className="label-row">
-              <h3>Daily diary</h3>
-              <span className="faint">private notes for tomorrow</span>
-            </div>
-            <div className="diary-grid">
-              <label className="field-block">
-                <span>What took the most energy today?</span>
+            <section className="notes-grid">
+              <div className="note-panel">
+                <div className="label-row"><h3>Learning note</h3><span className="faint">optional, useful</span></div>
+                <input placeholder="Topic - e.g. INNER JOIN" value={noteTopic} onChange={e => setNoteTopic(e.target.value)} style={{ marginBottom: 8 }} />
+                <textarea placeholder="Paste what you learned, an answer, or rough notes..." value={note} onChange={e => setNote(e.target.value)} />
+                <div className="row" style={{ marginTop: 10 }}>
+                  <button className="btn primary sm" onClick={sendNote} disabled={noteBusy || !note.trim()}>{noteBusy ? 'Saving...' : 'Get feedback'}</button>
+                  {speech.supported && (
+                    <button className={`btn ghost sm ${speech.listening ? 'listening' : ''}`} onClick={speech.toggle}>
+                      {speech.listening ? 'Stop dictation' : 'Dictate'}
+                    </button>
+                  )}
+                </div>
+                {feedback && (
+                  <div className="ai-box">
+                    <div className="who">Coach</div>
+                    <div>{feedback.ai_feedback || 'Saved. AI feedback is unavailable right now.'}</div>
+                    {feedback.follow_up && <div className="follow">Test yourself: {feedback.follow_up}</div>}
+                  </div>
+                )}
+              </div>
+
+              <div className="note-panel">
+                <div className="label-row"><h3>Tomorrow note</h3><span className="faint">end-of-day</span></div>
                 <textarea
-                  placeholder="Example: SQL joins took more focus than expected..."
+                  placeholder="What took the most energy today?"
                   value={hardThing}
                   onChange={e => setHardThing(e.target.value)}
                 />
-              </label>
-              <label className="field-block">
-                <span>What would make tomorrow easier?</span>
                 <textarea
-                  placeholder="Example: Start with a 60-second spoken answer before tasks."
-                  value={avoidedThing}
-                  onChange={e => setAvoidedThing(e.target.value)}
+                  placeholder="What would make tomorrow easier?"
+                  value={nextStep}
+                  onChange={e => setNextStep(e.target.value)}
+                  style={{ marginTop: 8 }}
                 />
-              </label>
-            </div>
-            <div className="row" style={{ marginTop: 10 }}>
-              <label className="mini-field">
-                <span>Tomorrow promise</span>
-                <input
-                  type="number"
-                  min="5"
-                  max="180"
-                  value={tomorrowMinutes}
-                  onChange={e => setTomorrowMinutes(e.target.value)}
-                  placeholder="20"
-                />
-              </label>
-              <button className="btn sage" onClick={saveDiary} disabled={diaryBusy}>
-                {diaryBusy ? 'Saving...' : 'Save diary'}
-              </button>
-            </div>
-            {diaryMsg && <div className="toast">{diaryMsg}</div>}
-            <p className="faint" style={{ marginTop: 10 }}>Keep this light. You are leaving small instructions for tomorrow.</p>
-          </div>
+                <div className="row" style={{ marginTop: 10 }}>
+                  <label className="mini-field">
+                    <span>Tomorrow minutes</span>
+                    <input type="number" min="5" max="180" value={tomorrowMinutes} onChange={e => setTomorrowMinutes(e.target.value)} placeholder="20" />
+                  </label>
+                  <button className="btn sage sm" onClick={saveDiary} disabled={diaryBusy}>{diaryBusy ? 'Saving...' : 'Save note'}</button>
+                </div>
+                {diaryMsg && <div className="toast">{diaryMsg}</div>}
+              </div>
+            </section>
+          </main>
 
-          <div className="card">
-            <div className="label-row"><h3>Close the day</h3></div>
-            <div className="row">
-              <button className="btn sage" onClick={() => finishDay('done')} disabled={busy}>Mark done</button>
-              <button className="btn ghost" onClick={() => finishDay('rest')} disabled={busy}>Rest day</button>
+          <aside className="today-rail">
+            <div className="rail-panel">
+              <div className="label-row"><h3>Session setup</h3><span className="faint">{remainingCount} left</span></div>
+              <div className="row">
+                {MODES.map(([m, label]) => (
+                  <button key={m} className={`chip ${day.mode === m ? 'on' : ''}`} onClick={() => chooseMode(m)}>{label}</button>
+                ))}
+              </div>
+              <div className="divider" />
+              <div className="scale-row">
+                <span>Energy</span>
+                {[1, 2, 3, 4, 5].map(n => (
+                  <button key={n} className={`chip scale ${energy === n ? 'on' : ''}`} onClick={() => setScale('energy', n)}>{n}</button>
+                ))}
+              </div>
+              <div className="scale-row">
+                <span>Mood</span>
+                {[1, 2, 3, 4, 5].map(n => (
+                  <button key={n} className={`chip scale ${mood === n ? 'on' : ''}`} onClick={() => setScale('mood', n)}>{n}</button>
+                ))}
+              </div>
             </div>
-            <p className="faint" style={{ marginTop: 10 }}>A tiny day still counts. Closing the day keeps the rhythm alive.</p>
-          </div>
-        </>
+
+            <FocusSprint date={day.the_date} mode={day.mode} />
+
+            <div className="rail-panel close-panel">
+              <div className="label-row"><h3>Close the day</h3></div>
+              <p className="muted">This is the streak rule: the day counts only after at least one card is in Done.</p>
+              <button className="btn sage" onClick={() => finishDay('done')} disabled={busy || !canClose}>Close day</button>
+              {!canClose && <p className="faint">Move one card to Done first.</p>}
+              <button className="btn ghost" onClick={() => finishDay('skipped')} disabled={busy}>Leave out of streak</button>
+              <Chain series={progress?.series || []} />
+            </div>
+
+            <OptionalTools date={day.the_date} />
+          </aside>
+        </div>
       )}
     </div>
   );

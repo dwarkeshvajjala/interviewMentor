@@ -45,10 +45,17 @@ router.get('/roadmap', (req, res) => {
 // ---------- progress / streak ----------
 router.get('/progress', requireSupabase, async (req, res) => {
   try {
-    const { data: days } = await supabase.from('days').select('the_date, mode, status').order('the_date');
+    const { data: days } = await supabase.from('days').select('id, the_date, mode, status').order('the_date');
     const points = { full: 3, normal: 2, low: 1 };
     const today = todayDate();
     const byDate = new Map((days || []).map(d => [String(d.the_date), d]));
+    const dayIds = new Set((days || []).map(d => d.id));
+    const { data: allTaskRows } = await supabase.from('tasks').select('day_id, done');
+    const taskRows = (allTaskRows || []).filter(task => dayIds.has(task.day_id));
+    const doneByDayId = new Map();
+    for (const task of taskRows || []) {
+      if (task.done) doneByDayId.set(task.day_id, (doneByDayId.get(task.day_id) || 0) + 1);
+    }
 
     function asUtcDate(dateStr) {
       const [y, m, d] = String(dateStr).split('-').map(Number);
@@ -61,8 +68,7 @@ router.get('/progress', requireSupabase, async (req, res) => {
 
     function scoreDay(day) {
       if (!day) return 0;
-      if (day.status === 'rest') return 1;
-      if (day.status === 'done') return points[day.mode] || 0;
+      if (day.status === 'done' && (doneByDayId.get(day.id) || 0) > 0) return points[day.mode] || 0;
       return 0;
     }
 
@@ -76,9 +82,10 @@ router.get('/progress', requireSupabase, async (req, res) => {
         const date = formatDate(cur);
         const day = byDate.get(date);
         const p = scoreDay(day);
-        const status = day?.status === 'pending' && date < today
+        const rawStatus = day?.status === 'pending' && date < today
           ? 'missed'
           : (day?.status || (date === today ? 'pending' : 'missed'));
+        const status = rawStatus === 'done' && p === 0 ? 'missed' : rawStatus;
         total += p;
         series.push({ date, points: p, mode: day?.mode || 'missed', status });
       }

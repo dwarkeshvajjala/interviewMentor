@@ -36,7 +36,35 @@ async function ensureDay(dateStr) {
       // Only the request that actually created the day seeds its tasks,
       // so concurrent loads can never produce duplicate tasks.
       if (plan.tasks?.length) {
-        const rows = plan.tasks.map((t, i) => ({
+        const { data: previousDays } = await supabase
+          .from('days')
+          .select('id, the_date, status')
+          .lt('the_date', dateStr)
+          .order('the_date', { ascending: false })
+          .limit(1);
+        const previous = previousDays?.[0];
+        let carried = [];
+
+        if (previous && previous.status !== 'rest') {
+          const { data: previousTasks } = await supabase
+            .from('tasks')
+            .select('kind, title, detail, resource_url, minutes, done, position')
+            .eq('day_id', previous.id)
+            .eq('done', false)
+            .order('position');
+          carried = (previousTasks || []).slice(0, 3).map(t => ({
+            kind: t.kind,
+            title: t.title,
+            detail: `Carried over from ${previous.the_date}. ${t.detail || ''}`.trim(),
+            resource_url: t.resource_url || '',
+            minutes: t.minutes || null
+          }));
+        }
+
+        const seedTasks = carried.length >= 3
+          ? carried
+          : [...carried, ...plan.tasks].slice(0, 3);
+        const rows = seedTasks.map((t, i) => ({
           day_id: day.id, kind: t.kind, title: t.title, detail: t.detail,
           resource_url: t.resource_url || '', minutes: t.minutes || null, position: i
         }));
@@ -119,13 +147,22 @@ router.post('/day/status', async (req, res) => {
   try {
     const dateStr = req.body.date || todayDate();
     const status = req.body.status || 'done';
+    const { data: existing } = await supabase.from('days').select('*').eq('the_date', dateStr).maybeSingle();
+    if (!existing) return res.status(404).json({ error: 'No day to update yet. Open Today first.' });
+
+    const { data: existingTasks } = await supabase.from('tasks').select('done').eq('day_id', existing.id);
+    const doneBeforeClose = (existingTasks || []).filter(t => t.done).length;
+    if (status === 'done' && doneBeforeClose === 0) {
+      return res.status(400).json({ error: 'Move at least one task card to Done before closing the day.' });
+    }
+
     const { data: day, error } = await supabase.from('days').update({ status }).eq('the_date', dateStr).select().maybeSingle();
     if (error) throw error;
     if (!day) return res.status(404).json({ error: 'No day to update yet. Open Today first.' });
 
-    const { data: tasks } = await supabase.from('tasks').select('*').eq('day_id', day.id);
+    const tasks = existingTasks || [];
     const { data: log } = await supabase.from('logs').select('*').eq('the_date', dateStr).maybeSingle();
-    const doneCount = (tasks || []).filter(t => t.done).length;
+    const doneCount = tasks.filter(t => t.done).length;
     const summary = `${doneCount}/${(tasks || []).length} tasks done. ${day.phase || ''}`.trim();
 
     // Fire-and-forget Notion sync (does nothing if Notion not configured).
