@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../api.js';
 import { ErrorState, InlineNotice, LoadingState } from '../components/States.jsx';
-import { useSpeechInput } from '../useSpeechInput.js';
 import { getDailyCoachLine, getDailyEdge, getTimeGreeting } from '../motivation.js';
 
 const MODES = [['full', 'Full - 2h'], ['normal', 'Normal - 90m'], ['low', 'Low - 20m']];
@@ -97,7 +97,7 @@ function FocusSprint({ date, mode }) {
     <div className={`rail-panel sprint-panel ${running ? 'running' : ''}`}>
       <div className="label-row">
         <h3>Focus timer</h3>
-        <span className="faint">{target}m</span>
+        <span className="faint">{target}m sprint</span>
       </div>
       <div className="sprint-time small">{formatSprint(secondsLeft)}</div>
       <div className="sprint-track"><span style={{ width: `${progress}%` }} /></div>
@@ -127,7 +127,7 @@ function loadPact() {
   }
 }
 
-function OptionalTools({ date }) {
+function CoachTools({ date, firstTaskTitle }) {
   const edge = getDailyEdge();
   const [pact, setPact] = useState(loadPact);
   const [locked, setLocked] = useState(() => localStorage.getItem(`mentor-pact-locked-${date}`) === 'true');
@@ -158,32 +158,41 @@ function OptionalTools({ date }) {
   }
 
   return (
-    <details className="rail-details">
-      <summary>Optional tools</summary>
-      <div className="tool-block">
+    <div className="rail-panel coach-tools">
+      <div className="label-row">
+        <h3>When stuck</h3>
+        <span className="faint">discipline tools</span>
+      </div>
+
+      <div className="tool-highlight">
         <div className="faint">{edge.origin}</div>
         <b>{edge.name}</b>
-        <p className="muted">{edge.tip}</p>
+        <p>{edge.tip}</p>
       </div>
-      <div className="tool-block">
-        <div className="label-row">
-          <h3>Setup rule</h3>
-          <button className={`btn sm ${locked ? 'sage' : 'ghost'}`} onClick={lockToday}>
-            {locked ? 'Locked' : 'Lock'}
-          </button>
-        </div>
+
+      <div className="mini-action-grid">
+        <button className="btn ghost sm" onClick={() => setSecondsLeft(90)}>
+          {secondsLeft > 0 ? `Reset ${formatSprint(secondsLeft)}` : '90-sec reset'}
+        </button>
+        <button className={`btn sm ${locked ? 'sage' : 'ghost'}`} onClick={lockToday}>
+          {locked ? 'First move locked' : 'Lock first move'}
+        </button>
+      </div>
+
+      <p className="faint">
+        {locked
+          ? `Locked: start with "${firstTaskTitle || 'the first card'}" before opening anything else.`
+          : 'Locking the first move is just a small promise to future-you. Nothing dramatic, just less negotiation.'}
+      </p>
+
+      <details className="inside-details">
+        <summary>Edit setup rule</summary>
         <label className="field-block"><span>Wish</span><input value={pact.wish} onChange={e => update('wish', e.target.value)} /></label>
         <label className="field-block"><span>If-then plan</span><textarea value={pact.plan} onChange={e => update('plan', e.target.value)} /></label>
-      </div>
-      <div className="tool-block">
-        <div className="label-row">
-          <h3>90-second reset</h3>
-          <span className="faint">{secondsLeft > 0 ? formatSprint(secondsLeft) : 'ready'}</span>
-        </div>
-        <p className="muted">For crowded moments: breathe, stand up, then return to the first card.</p>
-        <button className="btn ghost sm" onClick={() => setSecondsLeft(90)}>{secondsLeft > 0 ? 'Restart' : 'Start reset'}</button>
-      </div>
-    </details>
+      </details>
+
+      <Link className="note-link" to="/notes">Open notebook after a card</Link>
+    </div>
   );
 }
 
@@ -227,6 +236,46 @@ function TaskColumn({ title, hint, tasks, done, onDropTask, children }) {
   );
 }
 
+function TaskListView({ tasks, onMove }) {
+  return (
+    <div className="task-list-view">
+      {tasks.map((task, index) => (
+        <div key={task.id} className={`task-row ${task.done ? 'done' : ''}`}>
+          <div className="task-status">{task.done ? 'Done' : `#${index + 1}`}</div>
+          <div className="task-row-main">
+            <div className="task-head">
+              <span className={`kind-tag kind-${task.kind}`}>{task.kind}</span>
+              {task.minutes ? <span className="min">{task.minutes} min</span> : null}
+            </div>
+            <div className="task-title">{task.title}</div>
+            <p className="task-detail">{task.detail}</p>
+          </div>
+          <button className="btn sm ghost" onClick={() => onMove(task.id)}>{task.done ? 'Move back' : 'Move done'}</button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CarryoverExplainer({ remainingCount }) {
+  return (
+    <div className="plan-rules">
+      <div>
+        <span>Today</span>
+        <b>One finished card makes the day count.</b>
+      </div>
+      <div>
+        <span>Tomorrow</span>
+        <b>{remainingCount ? `${remainingCount} unfinished card${remainingCount === 1 ? '' : 's'} come back first.` : 'No unfinished cards to carry.'}</b>
+      </div>
+      <div>
+        <span>Fit plan</span>
+        <b>AI resizes today inside this week. It does not jump the roadmap.</b>
+      </div>
+    </div>
+  );
+}
+
 export default function Today() {
   const [data, setData] = useState(null);
   const [progress, setProgress] = useState({ series: [], streak: 0, totalPoints: 0 });
@@ -234,6 +283,10 @@ export default function Today() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
   const [draggingId, setDraggingId] = useState(null);
+  const [boardView, setBoardView] = useState(() => {
+    const saved = localStorage.getItem('mentor-board-view');
+    return saved === 'list' ? 'list' : 'board';
+  });
 
   const [energy, setEnergy] = useState(null);
   const [mood, setMood] = useState(null);
@@ -243,14 +296,9 @@ export default function Today() {
   const [diaryMsg, setDiaryMsg] = useState('');
   const [diaryBusy, setDiaryBusy] = useState(false);
 
-  const [note, setNote] = useState('');
-  const [noteTopic, setNoteTopic] = useState('');
-  const [feedback, setFeedback] = useState(null);
-  const [noteBusy, setNoteBusy] = useState(false);
-  const appendDictation = useCallback((text) => {
-    setNote(prev => `${prev}${prev ? ' ' : ''}${text}`);
-  }, []);
-  const speech = useSpeechInput(appendDictation);
+  useEffect(() => {
+    localStorage.setItem('mentor-board-view', boardView);
+  }, [boardView]);
 
   async function load() {
     try {
@@ -269,6 +317,7 @@ export default function Today() {
       setErr(e.message);
     }
   }
+
   useEffect(() => { load(); }, []);
 
   if (!data && err) {
@@ -290,6 +339,7 @@ export default function Today() {
   const streak = progress?.streak || 0;
   const greeting = getTimeGreeting();
   const coachLine = getDailyCoachLine({ streak, doneCount, totalTasks: tasks.length });
+  const firstTaskTitle = todoTasks[0]?.title || tasks[0]?.title || '';
 
   async function toggle(id) {
     setErr('');
@@ -319,11 +369,11 @@ export default function Today() {
   }
 
   async function setScale(kind, val) {
-    const e = kind === 'energy' ? val : energy;
-    const mo = kind === 'mood' ? val : mood;
+    const nextEnergy = kind === 'energy' ? val : energy;
+    const nextMood = kind === 'mood' ? val : mood;
     if (kind === 'energy') setEnergy(val); else setMood(val);
     try {
-      await api.saveLog({ date: day.the_date, energy: e, mood: mo });
+      await api.saveLog({ date: day.the_date, energy: nextEnergy, mood: nextMood });
     } catch (e) {
       console.warn('[today] check-in save failed', e);
       setErr(`Could not save check-in: ${e.message}`);
@@ -331,15 +381,17 @@ export default function Today() {
   }
 
   async function replan() {
-    setBusy(true); setMsg(''); setErr('');
+    setBusy(true);
+    setMsg('');
+    setErr('');
     try {
       const minutes = day.mode === 'low' ? 20 : day.mode === 'full' ? 120 : 90;
-      const out = await api.replan({ date: day.the_date, energy, mood, minutes });
+      const out = await api.replan({ date: day.the_date, energy, mood, minutes, recentNote: hardThing || nextStep });
       setData(d => ({ ...d, tasks: out.tasks, day: { ...d.day, mode: out.mode || d.day.mode } }));
-      setMsg(out.message || 'Re-planned for today.');
+      setMsg(out.message || 'Plan fitted inside this week. Anything left unfinished still comes back first tomorrow.');
     } catch (e) {
       const aiHint = e.message.includes('GROQ_API_KEY')
-        ? 'AI coaching is not configured yet. Your original tasks are still safe.'
+        ? 'AI coaching is not configured yet. Your original cards are still safe.'
         : e.message;
       setErr(aiHint);
       console.warn('[today] replan failed', e);
@@ -347,22 +399,10 @@ export default function Today() {
     setBusy(false);
   }
 
-  async function sendNote() {
-    if (!note.trim()) return;
-    setNoteBusy(true); setFeedback(null); setErr('');
-    try {
-      const out = await api.sendNote({ topic: noteTopic, content: note });
-      setFeedback(out.note);
-      setNote('');
-    } catch (e) {
-      setErr(`Could not save note: ${e.message}`);
-      console.warn('[today] note save failed', e);
-    }
-    setNoteBusy(false);
-  }
-
   async function saveDiary() {
-    setDiaryBusy(true); setDiaryMsg(''); setErr('');
+    setDiaryBusy(true);
+    setDiaryMsg('');
+    setErr('');
     try {
       const minutes = tomorrowMinutes === '' ? null : Number(tomorrowMinutes);
       await api.saveLog({
@@ -384,12 +424,14 @@ export default function Today() {
       setErr('Move at least one task card to Done before closing the day.');
       return;
     }
-    setBusy(true); setErr('');
+    setBusy(true);
+    setErr('');
     try {
       await api.setStatus(day.the_date, status);
+      setData(d => ({ ...d, day: { ...d.day, status } }));
       setMsg(status === 'done'
-        ? 'Day closed. The streak only counted because a task card was done.'
-        : 'Today is left out of the streak. Tomorrow will stay simple.');
+        ? 'Day closed. The streak counted because at least one real card was done.'
+        : 'Today is left out of the streak. The plan can continue tomorrow.');
       const p = await api.progress().catch(() => ({ series: [] }));
       setProgress(p || { series: [] });
     } catch (e) {
@@ -414,6 +456,7 @@ export default function Today() {
           <div className="eyebrow">{greeting.label} - {today}</div>
           <h1 className="day-title">{greeting.title}</h1>
           <p className="focus">{day.focus}</p>
+          <p className="hero-note">{greeting.line}</p>
         </div>
         {!beforeStart && (
           <div className="hero-metrics">
@@ -433,123 +476,133 @@ export default function Today() {
                 <div>
                   <div className="eyebrow">{day.week_label || 'Plan'} - Day {day.day_index}</div>
                   <h2>Today's sprint board</h2>
-                  <p className="muted">Your first job is simple: move one card to Done. If a day is left open, unfinished cards come first tomorrow.</p>
+                  <p className="muted">Start here. Do the cards in order, or switch to list view if you want a cleaner read.</p>
                 </div>
-                <button className="btn sm ghost" onClick={replan} disabled={busy}>{busy ? 'Re-planning...' : 'Re-plan'}</button>
+                <div className="board-controls">
+                  <div className="segmented" aria-label="Sprint board view">
+                    <button className={boardView === 'board' ? 'on' : ''} onClick={() => setBoardView('board')}>Board</button>
+                    <button className={boardView === 'list' ? 'on' : ''} onClick={() => setBoardView('list')}>List</button>
+                  </div>
+                  <button className="btn sm ghost" onClick={replan} disabled={busy}>{busy ? 'Fitting...' : 'Fit plan'}</button>
+                </div>
               </div>
+
               {msg && <div className="toast" style={{ marginBottom: 10 }}>{msg}</div>}
-              <div className="coach-strip steady">
+
+              <div className={`coach-strip ${coachLine.tone}`}>
                 <span>{coachLine.tag}</span>
                 <p>{coachLine.text}</p>
               </div>
-              <div className="kanban-board">
-                <TaskColumn
-                  title="Plan"
-                  hint="Do these in order. Drag or use the button."
-                  tasks={todoTasks}
-                  done={false}
-                  onDropTask={dropTask}
-                >
-                  {todoTasks.map(t => (
-                    <TaskCard key={t.id} task={t} onMove={toggle} onDragStart={setDraggingId} />
-                  ))}
-                </TaskColumn>
-                <TaskColumn
-                  title="Done"
-                  hint="Only cards here can close the day."
-                  tasks={doneTasks}
-                  done
-                  onDropTask={dropTask}
-                >
-                  {doneTasks.map(t => (
-                    <TaskCard key={t.id} task={t} onMove={toggle} onDragStart={setDraggingId} />
-                  ))}
-                </TaskColumn>
-              </div>
+
+              <CarryoverExplainer remainingCount={remainingCount} />
+
+              {boardView === 'board' ? (
+                <div className="kanban-board">
+                  <TaskColumn
+                    title="Plan"
+                    hint="Unfinished cards stay here and carry forward first tomorrow."
+                    tasks={todoTasks}
+                    done={false}
+                    onDropTask={dropTask}
+                  >
+                    {todoTasks.map(t => (
+                      <TaskCard key={t.id} task={t} onMove={toggle} onDragStart={setDraggingId} />
+                    ))}
+                  </TaskColumn>
+                  <TaskColumn
+                    title="Done"
+                    hint="Cards here are real evidence for the streak."
+                    tasks={doneTasks}
+                    done
+                    onDropTask={dropTask}
+                  >
+                    {doneTasks.map(t => (
+                      <TaskCard key={t.id} task={t} onMove={toggle} onDragStart={setDraggingId} />
+                    ))}
+                  </TaskColumn>
+                </div>
+              ) : (
+                <TaskListView tasks={[...todoTasks, ...doneTasks]} onMove={toggle} />
+              )}
             </section>
 
-            <section className="notes-grid">
-              <div className="note-panel">
-                <div className="label-row"><h3>Learning note</h3><span className="faint">optional, useful</span></div>
-                <input placeholder="Topic - e.g. INNER JOIN" value={noteTopic} onChange={e => setNoteTopic(e.target.value)} style={{ marginBottom: 8 }} />
-                <textarea placeholder="Paste what you learned, an answer, or rough notes..." value={note} onChange={e => setNote(e.target.value)} />
-                <div className="row" style={{ marginTop: 10 }}>
-                  <button className="btn primary sm" onClick={sendNote} disabled={noteBusy || !note.trim()}>{noteBusy ? 'Saving...' : 'Get feedback'}</button>
-                  {speech.supported && (
-                    <button className={`btn ghost sm ${speech.listening ? 'listening' : ''}`} onClick={speech.toggle}>
-                      {speech.listening ? 'Stop dictation' : 'Dictate'}
-                    </button>
-                  )}
+            <section className="notes-cta-panel">
+              <div>
+                <div className="label-row">
+                  <h3>Notebook is separate now</h3>
+                  <span className="faint">after each card</span>
                 </div>
-                {feedback && (
-                  <div className="ai-box">
-                    <div className="who">Coach</div>
-                    <div>{feedback.ai_feedback || 'Saved. AI feedback is unavailable right now.'}</div>
-                    {feedback.follow_up && <div className="follow">Test yourself: {feedback.follow_up}</div>}
-                  </div>
-                )}
+                <p className="muted">
+                  Paste rough learning notes there. It keeps your original wording, then adds examples, corrections,
+                  and a test question without cluttering today's board.
+                </p>
               </div>
+              <Link className="btn primary sm" to="/notes">Open notebook</Link>
+            </section>
 
-              <div className="note-panel">
-                <div className="label-row"><h3>Tomorrow note</h3><span className="faint">end-of-day</span></div>
-                <textarea
-                  placeholder="What took the most energy today?"
-                  value={hardThing}
-                  onChange={e => setHardThing(e.target.value)}
-                />
-                <textarea
-                  placeholder="What would make tomorrow easier?"
-                  value={nextStep}
-                  onChange={e => setNextStep(e.target.value)}
-                  style={{ marginTop: 8 }}
-                />
-                <div className="row" style={{ marginTop: 10 }}>
-                  <label className="mini-field">
-                    <span>Tomorrow minutes</span>
-                    <input type="number" min="5" max="180" value={tomorrowMinutes} onChange={e => setTomorrowMinutes(e.target.value)} placeholder="20" />
-                  </label>
-                  <button className="btn sage sm" onClick={saveDiary} disabled={diaryBusy}>{diaryBusy ? 'Saving...' : 'Save note'}</button>
-                </div>
-                {diaryMsg && <div className="toast">{diaryMsg}</div>}
+            <section className="note-panel reflection-panel">
+              <div className="label-row"><h3>Tomorrow handoff</h3><span className="faint">end-of-day</span></div>
+              <textarea
+                placeholder="What took the most energy today?"
+                value={hardThing}
+                onChange={e => setHardThing(e.target.value)}
+              />
+              <textarea
+                placeholder="What would make tomorrow easier?"
+                value={nextStep}
+                onChange={e => setNextStep(e.target.value)}
+                style={{ marginTop: 8 }}
+              />
+              <div className="row" style={{ marginTop: 10 }}>
+                <label className="mini-field">
+                  <span>Tomorrow minutes</span>
+                  <input type="number" min="5" max="180" value={tomorrowMinutes} onChange={e => setTomorrowMinutes(e.target.value)} placeholder="20" />
+                </label>
+                <button className="btn sage sm" onClick={saveDiary} disabled={diaryBusy}>{diaryBusy ? 'Saving...' : 'Save handoff'}</button>
               </div>
+              {diaryMsg && <div className="toast">{diaryMsg}</div>}
             </section>
           </main>
 
           <aside className="today-rail">
             <div className="rail-panel">
-              <div className="label-row"><h3>Session setup</h3><span className="faint">{remainingCount} left</span></div>
+              <div className="label-row"><h3>Plan size</h3><span className="faint">{remainingCount} left</span></div>
               <div className="row">
                 {MODES.map(([m, label]) => (
                   <button key={m} className={`chip ${day.mode === m ? 'on' : ''}`} onClick={() => chooseMode(m)}>{label}</button>
                 ))}
               </div>
-              <div className="divider" />
-              <div className="scale-row">
-                <span>Energy</span>
-                {[1, 2, 3, 4, 5].map(n => (
-                  <button key={n} className={`chip scale ${energy === n ? 'on' : ''}`} onClick={() => setScale('energy', n)}>{n}</button>
-                ))}
-              </div>
-              <div className="scale-row">
-                <span>Mood</span>
-                {[1, 2, 3, 4, 5].map(n => (
-                  <button key={n} className={`chip scale ${mood === n ? 'on' : ''}`} onClick={() => setScale('mood', n)}>{n}</button>
-                ))}
-              </div>
+              <p className="faint">Change size when the day changes. Use Fit plan only when the cards themselves need resizing.</p>
+
+              <details className="inside-details compact">
+                <summary>Energy / mood check-in</summary>
+                <div className="scale-row">
+                  <span>Energy</span>
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <button key={n} className={`chip scale ${energy === n ? 'on' : ''}`} onClick={() => setScale('energy', n)}>{n}</button>
+                  ))}
+                </div>
+                <div className="scale-row">
+                  <span>Mood</span>
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <button key={n} className={`chip scale ${mood === n ? 'on' : ''}`} onClick={() => setScale('mood', n)}>{n}</button>
+                  ))}
+                </div>
+              </details>
             </div>
 
             <FocusSprint date={day.the_date} mode={day.mode} />
 
             <div className="rail-panel close-panel">
               <div className="label-row"><h3>Close the day</h3></div>
-              <p className="muted">This is the streak rule: the day counts only after at least one card is in Done.</p>
+              <p className="muted">The rule is strict now: no finished card, no streak point. Searching or opening the app does not count by itself.</p>
               <button className="btn sage" onClick={() => finishDay('done')} disabled={busy || !canClose}>Close day</button>
               {!canClose && <p className="faint">Move one card to Done first.</p>}
               <button className="btn ghost" onClick={() => finishDay('skipped')} disabled={busy}>Leave out of streak</button>
               <Chain series={progress?.series || []} />
             </div>
 
-            <OptionalTools date={day.the_date} />
+            <CoachTools date={day.the_date} firstTaskTitle={firstTaskTitle} />
           </aside>
         </div>
       )}

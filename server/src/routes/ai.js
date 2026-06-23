@@ -5,6 +5,24 @@ import { replanDay, noteFeedback, generateMock } from '../groq.js';
 
 const router = Router();
 
+function formatNoteFeedback(fb) {
+  if (!fb || fb.error) return null;
+  const parts = [];
+
+  if (fb.feedback) parts.push(String(fb.feedback).trim());
+  if (fb.clean_note) parts.push(`Cleaner version:\n${String(fb.clean_note).trim()}`);
+
+  if (Array.isArray(fb.examples) && fb.examples.length) {
+    parts.push(`Examples:\n${fb.examples.slice(0, 3).map(x => `- ${String(x).trim()}`).join('\n')}`);
+  }
+
+  if (Array.isArray(fb.fixes) && fb.fixes.length) {
+    parts.push(`Quick fixes:\n${fb.fixes.slice(0, 3).map(x => `- ${String(x).trim()}`).join('\n')}`);
+  }
+
+  return parts.filter(Boolean).join('\n\n') || null;
+}
+
 // Re-plan today's tasks with AI, then REPLACE today's tasks in the DB.
 router.post('/replan', requireSupabase, async (req, res) => {
   try {
@@ -61,7 +79,7 @@ router.post('/note', requireSupabase, async (req, res) => {
     const row = {
       topic: topic || null,
       content,
-      ai_feedback: fb.error ? null : (fb.feedback || null),
+      ai_feedback: formatNoteFeedback(fb),
       follow_up: fb.follow_up || null,
       restudy_flag: !!fb.restudy
     };

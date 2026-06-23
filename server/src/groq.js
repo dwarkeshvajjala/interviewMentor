@@ -66,7 +66,9 @@ export async function replanDay({ plan, energy, mood, minutes, recentNote }) {
   const sys = `${COACH_RULES}
 Return ONLY JSON, no prose, no markdown fences. Shape:
 {"mode":"full|normal|low","message":"one warm sentence","tasks":[{"kind":"code|learn|speak","title":"...","detail":"...","minutes":number}]}
-Keep tasks aligned to the same week/topics as the original plan. If energy is low (1-2) or minutes < 30, shrink to a single tiny doable task per kind, or fewer tasks, and set mode to "low".`;
+Keep tasks aligned to the same week/topics as the original plan. Do not jump to a new week, a new roadmap topic, or a random interview theme.
+If a task looks carried over from an earlier day, keep that learning thread unless it is impossible for today's time.
+If energy is low (1-2) or minutes < 30, shrink to a single tiny doable task per kind, or fewer tasks, and set mode to "low".`;
 
   const user = `Original plan for today:
 Week: ${plan.weekLabel}
@@ -90,8 +92,11 @@ Adjust today's 3 tasks to fit this reality. Stay on the same topics.`;
 // Feedback on a pasted learning note.
 export async function noteFeedback({ topic, content }) {
   const sys = `${COACH_RULES}
-He will paste notes or an answer he wrote while studying. Give SHORT, specific feedback.
-Return ONLY JSON: {"feedback":"2-3 sentences, encouraging and concrete","follow_up":"one question to test if he really gets it","restudy":true|false}
+He will paste rough natural-language notes or an answer he wrote while studying.
+The app stores his raw note separately. Do not erase his voice or pretend the rough note was polished.
+Give practical feedback that helps him learn faster.
+Return ONLY JSON:
+{"feedback":"2-3 sentences, encouraging and concrete","clean_note":"a cleaner version that keeps his meaning and plain language","examples":["1-3 short examples or analogies"],"fixes":["1-3 grammar/wording/concept fixes"],"follow_up":"one question to test if he really gets it","restudy":true|false}
 Set restudy true only if the note shows a real misunderstanding.`;
   const user = `Topic: ${topic || 'unspecified'}\n\nHis note/answer:\n${content}`;
   const out = await chat([{ role: 'system', content: sys }, { role: 'user', content: user }], { json: true });

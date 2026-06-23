@@ -259,6 +259,11 @@ button { font-family: inherit; cursor: pointer; }
 }
 h1.day-title { font-family: var(--display); font-size: 26px; font-weight: 700; letter-spacing: 0; margin: 4px 0 6px; }
 .focus { color: var(--muted); font-size: 14px; margin: 0; }
+.hero-note {
+  color: var(--faint);
+  font-size: 13px;
+  margin: 8px 0 0;
+}
 .hero-card {
   overflow: hidden;
   background:
@@ -427,6 +432,10 @@ h1.day-title { font-family: var(--display); font-size: 26px; font-weight: 700; l
 
 /* ---------- buttons ---------- */
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
   border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
   border-radius: var(--radius-sm); padding: 10px 16px; font-size: 14px; font-weight: 500;
 }
@@ -871,6 +880,59 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
   font-size: 20px;
   letter-spacing: 0;
 }
+.board-controls {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  background: var(--bg-2);
+}
+.segmented button {
+  border: 0;
+  border-radius: 99px;
+  background: transparent;
+  color: var(--muted);
+  padding: 5px 10px;
+  font-size: 12.5px;
+}
+.segmented button.on {
+  background: var(--surface-2);
+  color: var(--text);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset;
+}
+.plan-rules {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+.plan-rules > div {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--panel-wash);
+  padding: 10px;
+}
+.plan-rules span {
+  display: block;
+  color: var(--faint);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+.plan-rules b {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  line-height: 1.4;
+}
 .kanban-board {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(260px, 0.75fr);
@@ -947,6 +1009,37 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
 .task-actions a:hover {
   text-decoration: underline;
 }
+.task-list-view {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+.task-row {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  padding: 12px;
+}
+.task-row.done {
+  border-color: rgba(95,208,165,0.38);
+  opacity: 0.74;
+}
+.task-row.done .task-title {
+  text-decoration: line-through;
+  text-decoration-color: var(--faint);
+}
+.task-status {
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.task-row-main {
+  min-width: 0;
+}
 .empty-drop {
   border: 1px dashed var(--border);
   border-radius: var(--radius-sm);
@@ -954,6 +1047,23 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
   padding: 18px;
   text-align: center;
   font-size: 13px;
+}
+.notes-cta-panel {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--surface), var(--bg-2));
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+.notes-cta-panel p {
+  margin: 0;
+}
+.reflection-panel textarea {
+  min-height: 78px;
 }
 .notes-grid {
   display: grid;
@@ -1006,6 +1116,171 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
 .tool-block p {
   margin: 6px 0 0;
   font-size: 13px;
+}
+.inside-details {
+  margin-top: 12px;
+  border-top: 1px solid var(--border-soft);
+  padding-top: 10px;
+}
+.inside-details summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.inside-details .field-block {
+  display: block;
+  margin-top: 10px;
+}
+.inside-details.compact .scale-row {
+  margin-top: 10px;
+}
+.coach-tools {
+  border-color: rgba(244,185,91,0.28);
+}
+.tool-highlight {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--panel-wash);
+  padding: 11px;
+}
+.tool-highlight b {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--display);
+}
+.tool-highlight p {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+.mini-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+.note-link {
+  display: block;
+  margin-top: 12px;
+  color: var(--code);
+  text-decoration: none;
+  font-size: 13px;
+}
+.note-link:hover {
+  text-decoration: underline;
+}
+
+/* ---------- notebook ---------- */
+.notebook-page {
+  display: grid;
+  gap: 16px;
+}
+.notebook-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(95,208,165,0.10), transparent 45%),
+    linear-gradient(180deg, var(--surface), var(--bg-2));
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+.notebook-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 16px;
+  align-items: start;
+}
+.notebook-composer,
+.note-feed {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--surface), var(--bg-2));
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+.notebook-composer {
+  display: grid;
+  gap: 10px;
+}
+.notebook-composer textarea {
+  min-height: 260px;
+  line-height: 1.6;
+}
+.notebook-side {
+  display: grid;
+  gap: 14px;
+  position: sticky;
+  top: 18px;
+}
+.note-feed {
+  display: grid;
+  gap: 12px;
+}
+.note-card {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  padding: 14px;
+}
+.note-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+.note-card-head h3 {
+  margin: 3px 0 0;
+  font-family: var(--display);
+  font-size: 16px;
+}
+.raw-note {
+  white-space: pre-wrap;
+  color: var(--muted);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--panel-wash);
+  padding: 11px;
+  font-size: 13.5px;
+}
+.raw-note.small {
+  font-size: 13px;
+}
+.feedback-box {
+  border: 1px solid var(--amber-dim);
+  background: rgba(230,165,82,0.05);
+  border-radius: var(--radius-sm);
+  padding: 13px;
+  margin-top: 12px;
+  font-size: 14px;
+}
+.feedback-box.fresh {
+  margin-top: 4px;
+}
+.feedback-box .who {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--amber);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.ai-text {
+  white-space: pre-wrap;
+  color: var(--muted);
+}
+.feedback-box .raw-note + .ai-text {
+  margin-top: 12px;
+}
+.feedback-box .follow {
+  color: var(--muted);
+  margin-top: 8px;
+  font-style: italic;
 }
 
 /* ---------- misc ---------- */
@@ -1086,16 +1361,30 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
   }
   .today-layout,
   .kanban-board,
-  .notes-grid {
+  .notes-grid,
+  .notebook-layout,
+  .plan-rules {
     grid-template-columns: 1fr;
   }
   .today-rail {
     position: static;
   }
   .today-hero,
-  .board-header {
+  .notebook-hero,
+  .board-header,
+  .notes-cta-panel {
     flex-direction: column;
     align-items: stretch;
+  }
+  .board-controls {
+    justify-items: stretch;
+  }
+  .task-row {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+  .notebook-side {
+    position: static;
   }
   .hero-metrics {
     min-width: 0;
@@ -1112,6 +1401,13 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
   }
   .today-rail .rail-details {
     grid-column: 1 / -1;
+  }
+  .notebook-layout {
+    grid-template-columns: 1fr;
+  }
+  .notebook-side {
+    position: static;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
