@@ -68,7 +68,8 @@ async function ensureDay(dateStr) {
           day_id: day.id, kind: t.kind, title: t.title, detail: t.detail,
           resource_url: t.resource_url || '', minutes: t.minutes || null, position: i
         }));
-        await supabase.from('tasks').insert(rows);
+        const { error: taskErr } = await supabase.from('tasks').insert(rows);
+        if (taskErr) throw taskErr;
       }
     }
   }
@@ -109,6 +110,7 @@ router.post('/task/:id/toggle', async (req, res) => {
 router.post('/day/mode', async (req, res) => {
   try {
     const { date, mode } = req.body;
+    if (!Object.prototype.hasOwnProperty.call(modes, mode)) return res.status(400).json({ error: 'Invalid mode.' });
     const { error } = await supabase.from('days').update({ mode }).eq('the_date', date || todayDate());
     if (error) throw error;
     res.json({ ok: true });

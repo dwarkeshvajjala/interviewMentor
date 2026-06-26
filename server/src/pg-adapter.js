@@ -61,7 +61,32 @@ class PgQuery {
   }
 
   eq(column, value) {
-    this.filters.push({ column, value });
+    this.filters.push({ column, operator: '=', value });
+    return this;
+  }
+
+  neq(column, value) {
+    this.filters.push({ column, operator: '<>', value });
+    return this;
+  }
+
+  lt(column, value) {
+    this.filters.push({ column, operator: '<', value });
+    return this;
+  }
+
+  lte(column, value) {
+    this.filters.push({ column, operator: '<=', value });
+    return this;
+  }
+
+  gt(column, value) {
+    this.filters.push({ column, operator: '>', value });
+    return this;
+  }
+
+  gte(column, value) {
+    this.filters.push({ column, operator: '>=', value });
     return this;
   }
 
@@ -98,9 +123,9 @@ class PgQuery {
 
   buildWhere(params) {
     if (!this.filters.length) return '';
-    const clauses = this.filters.map(({ column, value }) => {
+    const clauses = this.filters.map(({ column, operator, value }) => {
       params.push(value);
-      return `${quoteIdent(column)} = $${params.length}`;
+      return `${quoteIdent(column)} ${operator} $${params.length}`;
     });
     return ` WHERE ${clauses.join(' AND ')}`;
   }

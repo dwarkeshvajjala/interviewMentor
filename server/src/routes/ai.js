@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { requireSupabase, supabase } from '../supabase.js';
-import { planForDate, todayDate } from '../planner.js';
+import { modes, planForDate, todayDate } from '../planner.js';
 import { replanDay, noteFeedback, generateMock } from '../groq.js';
 
 const router = Router();
@@ -58,12 +58,16 @@ router.post('/replan', requireSupabase, async (req, res) => {
       return res.json({ message: "Kept your original plan — the AI didn't return usable tasks. Try again in a moment.", mode: day.mode, tasks: kept || [] });
     }
 
-    await supabase.from('tasks').delete().eq('day_id', day.id);
-    await supabase.from('tasks').insert(clean);
-    await supabase.from('days').update({ was_replanned: true, mode: out.plan.mode || day.mode }).eq('id', day.id);
+    const nextMode = Object.prototype.hasOwnProperty.call(modes, out.plan?.mode) ? out.plan.mode : day.mode;
+    const { error: deleteErr } = await supabase.from('tasks').delete().eq('day_id', day.id);
+    if (deleteErr) throw deleteErr;
+    const { error: insertErr } = await supabase.from('tasks').insert(clean);
+    if (insertErr) throw insertErr;
+    const { error: dayErr } = await supabase.from('days').update({ was_replanned: true, mode: nextMode }).eq('id', day.id);
+    if (dayErr) throw dayErr;
 
     const { data: tasks } = await supabase.from('tasks').select('*').eq('day_id', day.id).order('position');
-    res.json({ message: out.plan.message || 'Re-planned for today.', mode: out.plan.mode || day.mode, tasks });
+    res.json({ message: out.plan.message || 'Re-planned for today.', mode: nextMode, tasks });
   } catch (e) {
     res.status(500).json({ error: String(e.message || e) });
   }

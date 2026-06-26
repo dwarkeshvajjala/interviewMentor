@@ -4,8 +4,6 @@ import { api } from '../api.js';
 import { ErrorState, InlineNotice, LoadingState } from '../components/States.jsx';
 import { getDailyCoachLine, getDailyEdge, getTimeGreeting } from '../motivation.js';
 
-const MODES = [['full', 'Full - 2h'], ['normal', 'Normal - 90m'], ['low', 'Low - 20m']];
-const TOOL_TABS = [['timer', 'Timer'], ['time', 'Time'], ['hard', 'Hard mode']];
 const DEFAULT_PACT = {
   wish: 'Become interview-ready and open better career options.',
   outcome: 'More confidence, better conversations, and a calmer path forward.',
@@ -21,7 +19,7 @@ const PUSH_STYLES = {
   },
   direct: {
     label: 'Direct',
-    line: 'No big speech. Pick the first card, start the timer, and create evidence.'
+    line: 'No big speech. Pick the first card, open the resource, and create evidence.'
   },
   navy: {
     label: 'Navy',
@@ -49,85 +47,6 @@ function Chain({ series }) {
         })}
       </div>
       <div className="chain-label"><b>{alive}</b> recent wins</div>
-    </div>
-  );
-}
-
-function FocusSprint({ date, mode }) {
-  const fallbackMinutes = mode === 'full' ? 45 : mode === 'low' ? 10 : 20;
-  const [target, setTarget] = useState(fallbackMinutes);
-  const [secondsLeft, setSecondsLeft] = useState(fallbackMinutes * 60);
-  const [running, setRunning] = useState(false);
-  const [completed, setCompleted] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    setHydrated(false);
-    const saved = localStorage.getItem(`mentor-sprint-${date}`);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setTarget(parsed.target || fallbackMinutes);
-        setSecondsLeft(parsed.secondsLeft ?? (parsed.target || fallbackMinutes) * 60);
-        setCompleted(Boolean(parsed.completed));
-        setRunning(false);
-        setHydrated(true);
-        return;
-      } catch {
-        localStorage.removeItem(`mentor-sprint-${date}`);
-      }
-    }
-    setTarget(fallbackMinutes);
-    setSecondsLeft(fallbackMinutes * 60);
-    setRunning(false);
-    setCompleted(false);
-    setHydrated(true);
-  }, [date, fallbackMinutes]);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    localStorage.setItem(`mentor-sprint-${date}`, JSON.stringify({ target, secondsLeft, completed }));
-  }, [date, target, secondsLeft, completed, hydrated]);
-
-  useEffect(() => {
-    if (!running) return undefined;
-    if (secondsLeft <= 0) {
-      setRunning(false);
-      setCompleted(true);
-      return undefined;
-    }
-    const timer = window.setInterval(() => setSecondsLeft(s => Math.max(s - 1, 0)), 1000);
-    return () => window.clearInterval(timer);
-  }, [running, secondsLeft]);
-
-  function chooseTarget(minutes) {
-    setTarget(minutes);
-    setSecondsLeft(minutes * 60);
-    setRunning(false);
-    setCompleted(false);
-  }
-
-  const progress = Math.min(100, Math.max(0, 100 - (secondsLeft / (target * 60)) * 100));
-
-  return (
-    <div className={`rail-panel sprint-panel ${running ? 'running' : ''}`}>
-      <div className="label-row">
-        <h3>Focus timer</h3>
-        <span className="faint">{target}m sprint</span>
-      </div>
-      <div className="sprint-time small">{formatSprint(secondsLeft)}</div>
-      <div className="sprint-track"><span style={{ width: `${progress}%` }} /></div>
-      <div className="row" style={{ marginTop: 10 }}>
-        {[10, 20, 45].map(minutes => (
-          <button key={minutes} className={`chip ${target === minutes ? 'on' : ''}`} onClick={() => chooseTarget(minutes)}>
-            {minutes}
-          </button>
-        ))}
-      </div>
-      <div className="row" style={{ marginTop: 10 }}>
-        <button className="btn primary sm" onClick={() => setRunning(!running)}>{running ? 'Pause' : completed ? 'Again' : 'Start'}</button>
-        <button className="btn ghost sm" onClick={() => { setSecondsLeft(target * 60); setRunning(false); setCompleted(false); }}>Reset</button>
-      </div>
     </div>
   );
 }
@@ -212,38 +131,6 @@ function DisciplineLaunch({
   );
 }
 
-function NextCardSpotlight({ task, doneCount, totalTasks, onMove }) {
-  if (!task) {
-    return (
-      <div className="next-card-spotlight complete">
-        <div>
-          <div className="eyebrow">Sprint complete</div>
-          <h3>All cards are done.</h3>
-          <p>Close the day while the win is fresh. Tomorrow starts cleaner because of this.</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="next-card-spotlight">
-      <div className="next-card-copy">
-        <div className="eyebrow">Start here</div>
-        <h3>{task.title}</h3>
-        <p>{task.detail}</p>
-        <div className="next-card-meta">
-          {task.minutes ? <span>{task.minutes} min</span> : null}
-          <span>{doneCount}/{totalTasks} done</span>
-        </div>
-      </div>
-      <div className="next-card-actions">
-        {task.resource_url && <a className="btn sm ghost" href={task.resource_url} target="_blank" rel="noreferrer">Open resource</a>}
-        <button className="btn primary" onClick={() => onMove(task.id)}>Mark done</button>
-      </div>
-    </div>
-  );
-}
-
 function HardModePanel({ enabled, onToggle, contract, onContract, firstTaskTitle }) {
   return (
     <div className={`rail-panel hard-mode-panel ${enabled ? 'on' : ''}`}>
@@ -285,8 +172,8 @@ function CoachTools({ date, firstTaskTitle }) {
 
   useEffect(() => {
     if (secondsLeft <= 0) return undefined;
-    const timer = window.setInterval(() => setSecondsLeft(s => Math.max(s - 1, 0)), 1000);
-    return () => window.clearInterval(timer);
+    const interval = window.setInterval(() => setSecondsLeft(s => Math.max(s - 1, 0)), 1000);
+    return () => window.clearInterval(interval);
   }, [secondsLeft]);
 
   function update(key, value) {
@@ -421,107 +308,6 @@ function TaskListView({ tasks, onMove }) {
   );
 }
 
-function HomeTools({
-  date,
-  mode,
-  remainingCount,
-  dayMode,
-  onMode,
-  energy,
-  mood,
-  onScale,
-  hardMode,
-  onHardMode,
-  hardContract,
-  onHardContract,
-  doneCount,
-  totalTasks,
-  firstTaskTitle,
-  pushStyle,
-  onPushStyle,
-  reward,
-  onReward
-}) {
-  const [activeTool, setActiveTool] = useState('timer');
-
-  return (
-    <details className="home-tools">
-      <summary>Tools</summary>
-      <div className="tool-content">
-        <div className="tool-picker">
-          {TOOL_TABS.map(([key, label]) => (
-            <button
-              key={key}
-              className={`chip ${activeTool === key ? 'on' : ''}`}
-              onClick={() => setActiveTool(key)}
-              type="button"
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {activeTool === 'timer' && (
-          <div className="tool-pane">
-            <FocusSprint date={date} mode={mode} />
-          </div>
-        )}
-
-        {activeTool === 'time' && (
-          <div className="tool-pane">
-            <div className="notes-tool">
-              <div className="label-row"><h3>Time</h3><span className="faint">{remainingCount} left</span></div>
-              <div className="row">
-                {MODES.map(([m, label]) => (
-                  <button key={m} className={`chip ${dayMode === m ? 'on' : ''}`} onClick={() => onMode(m)}>{label}</button>
-                ))}
-              </div>
-              <details className="inside-details compact">
-                <summary>Check-in</summary>
-                <div className="scale-row">
-                  <span>Energy</span>
-                  {[1, 2, 3, 4, 5].map(n => (
-                    <button key={n} className={`chip scale ${energy === n ? 'on' : ''}`} onClick={() => onScale('energy', n)}>{n}</button>
-                  ))}
-                </div>
-                <div className="scale-row">
-                  <span>Mood</span>
-                  {[1, 2, 3, 4, 5].map(n => (
-                    <button key={n} className={`chip scale ${mood === n ? 'on' : ''}`} onClick={() => onScale('mood', n)}>{n}</button>
-                  ))}
-                </div>
-              </details>
-            </div>
-          </div>
-        )}
-
-        {activeTool === 'hard' && (
-          <div className="tool-pane hard-tool-stack">
-            <DisciplineLaunch
-              doneCount={doneCount}
-              totalTasks={totalTasks}
-              remainingCount={remainingCount}
-              firstTaskTitle={firstTaskTitle}
-              pushStyle={pushStyle}
-              onPushStyle={onPushStyle}
-              reward={reward}
-              onReward={onReward}
-            />
-            <HardModePanel
-              enabled={hardMode}
-              onToggle={onHardMode}
-              contract={hardContract}
-              onContract={onHardContract}
-              firstTaskTitle={firstTaskTitle}
-            />
-            <CoachTools date={date} firstTaskTitle={firstTaskTitle} />
-          </div>
-        )}
-      </div>
-    </details>
-  );
-}
-
 export default function Today() {
   const [data, setData] = useState(null);
   const [progress, setProgress] = useState({ series: [], streak: 0, totalPoints: 0 });
@@ -546,9 +332,6 @@ export default function Today() {
   const [draggingId, setDraggingId] = useState(null);
   const [boardView, setBoardView] = useState(() => localStorage.getItem('mentor-board-view') || 'board');
 
-  const [energy, setEnergy] = useState(null);
-  const [mood, setMood] = useState(null);
-
   useEffect(() => {
     localStorage.setItem('mentor-push-style', pushStyle);
   }, [pushStyle]);
@@ -571,8 +354,8 @@ export default function Today() {
 
   useEffect(() => {
     if (!skipArmed || skipSeconds <= 0) return undefined;
-    const timer = window.setInterval(() => setSkipSeconds(s => Math.max(s - 1, 0)), 1000);
-    return () => window.clearInterval(timer);
+    const interval = window.setInterval(() => setSkipSeconds(s => Math.max(s - 1, 0)), 1000);
+    return () => window.clearInterval(interval);
   }, [skipArmed, skipSeconds]);
 
   async function load() {
@@ -581,10 +364,6 @@ export default function Today() {
       const [t, p] = await Promise.all([api.getToday(), api.progress().catch(() => ({ series: [] }))]);
       setData(t);
       setProgress(p || { series: [] });
-      if (t.log) {
-        setEnergy(t.log.energy);
-        setMood(t.log.mood);
-      }
     } catch (e) {
       setErr(e.message);
     }
@@ -612,7 +391,6 @@ export default function Today() {
   const greeting = getTimeGreeting();
   const coachLine = getDailyCoachLine({ streak, doneCount, totalTasks: tasks.length });
   const firstTaskTitle = todoTasks[0]?.title || tasks[0]?.title || '';
-  const nextTask = todoTasks[0] || null;
 
   async function toggle(id) {
     setErr('');
@@ -633,34 +411,13 @@ export default function Today() {
     toggle(draggingId);
   }
 
-  async function chooseMode(m) {
-    setData(d => ({ ...d, day: { ...d.day, mode: m } }));
-    try {
-      await api.setMode(day.the_date, m);
-    } catch (e) {
-      setErr(`Could not save mode: ${e.message}`);
-    }
-  }
-
-  async function setScale(kind, val) {
-    const nextEnergy = kind === 'energy' ? val : energy;
-    const nextMood = kind === 'mood' ? val : mood;
-    if (kind === 'energy') setEnergy(val); else setMood(val);
-    try {
-      await api.saveLog({ date: day.the_date, energy: nextEnergy, mood: nextMood });
-    } catch (e) {
-      console.warn('[today] check-in save failed', e);
-      setErr(`Could not save check-in: ${e.message}`);
-    }
-  }
-
   async function replan() {
     setBusy(true);
     setMsg('');
     setErr('');
     try {
       const minutes = day.mode === 'low' ? 20 : day.mode === 'full' ? 120 : 90;
-      const out = await api.replan({ date: day.the_date, energy, mood, minutes });
+      const out = await api.replan({ date: day.the_date, minutes });
       setData(d => ({ ...d, tasks: out.tasks, day: { ...d.day, mode: out.mode || d.day.mode } }));
       setMsg(out.message || 'Updated the cards for today.');
     } catch (e) {
@@ -684,8 +441,8 @@ export default function Today() {
       await api.setStatus(day.the_date, status);
       setData(d => ({ ...d, day: { ...d.day, status } }));
       setMsg(status === 'done'
-        ? 'Day closed. The streak counted because at least one real card was done.'
-        : 'Today is left out of the streak. The plan can continue tomorrow.');
+        ? 'Day closed. Good work.'
+        : 'Today is marked skipped. Come back clean tomorrow.');
       const p = await api.progress().catch(() => ({ series: [] }));
       setProgress(p || { series: [] });
     } catch (e) {
@@ -766,8 +523,6 @@ export default function Today() {
 
               {msg && <div className="toast" style={{ marginBottom: 10 }}>{msg}</div>}
 
-              <NextCardSpotlight task={nextTask} doneCount={doneCount} totalTasks={tasks.length} onMove={toggle} />
-
               {boardView === 'board' ? (
                 <TaskBoard
                   todoTasks={todoTasks}
@@ -784,6 +539,33 @@ export default function Today() {
                 <span>{coachLine.tag}</span>
                 <p>{coachLine.text}</p>
               </div>
+
+              <section className="hard-tools-section">
+                <div className="label-row">
+                  <h3>Hard mode tools</h3>
+                  <span className="faint">optional</span>
+                </div>
+                <div className="hard-tools-grid">
+                  <DisciplineLaunch
+                    doneCount={doneCount}
+                    totalTasks={tasks.length}
+                    remainingCount={remainingCount}
+                    firstTaskTitle={firstTaskTitle}
+                    pushStyle={pushStyle}
+                    onPushStyle={setPushStyle}
+                    reward={reward}
+                    onReward={setReward}
+                  />
+                  <HardModePanel
+                    enabled={hardMode}
+                    onToggle={setHardMode}
+                    contract={hardContract}
+                    onContract={setHardContract}
+                    firstTaskTitle={firstTaskTitle}
+                  />
+                  <CoachTools date={day.the_date} firstTaskTitle={firstTaskTitle} />
+                </div>
+              </section>
             </section>
           </main>
 
@@ -807,7 +589,7 @@ export default function Today() {
               {skipArmed && (
                 <div className="hard-skip-box">
                   <b>Hard mode pause</b>
-                  <p>Do the two-minute entry first. If you still want to skip, write the reason and wait out the timer.</p>
+                  <p>Do the two-minute entry first. If you still want to skip, write the reason and wait out the pause.</p>
                   <label className="checkline">
                     <input type="checkbox" checked={entryTried} onChange={e => setEntryTried(e.target.checked)} />
                     <span>I tried the ugly 2-minute version.</span>
@@ -832,27 +614,6 @@ export default function Today() {
               <Chain series={progress?.series || []} />
             </div>
 
-            <HomeTools
-              date={day.the_date}
-              mode={day.mode}
-              remainingCount={remainingCount}
-              dayMode={day.mode}
-              onMode={chooseMode}
-              energy={energy}
-              mood={mood}
-              onScale={setScale}
-              hardMode={hardMode}
-              onHardMode={setHardMode}
-              hardContract={hardContract}
-              onHardContract={setHardContract}
-              doneCount={doneCount}
-              totalTasks={tasks.length}
-              firstTaskTitle={firstTaskTitle}
-              pushStyle={pushStyle}
-              onPushStyle={setPushStyle}
-              reward={reward}
-              onReward={setReward}
-            />
           </aside>
         </div>
       )}

@@ -36,7 +36,7 @@ function SetupStatus() {
           setState({ status: 'soft', message: 'Core app ready. Add GROQ_API_KEY later to enable AI coaching.' });
           return;
         }
-        setState({ status: 'ok', message: 'Backend connected.' });
+        setState({ status: 'ok', message: '' });
       })
       .catch((e) => {
         if (!active) return;
@@ -44,6 +44,8 @@ function SetupStatus() {
       });
     return () => { active = false; };
   }, []);
+
+  if (state.status === 'checking' || state.status === 'ok' || state.status === 'soft') return null;
 
   return (
     <div className={`setup-status ${state.status}`}>

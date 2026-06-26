@@ -5,9 +5,11 @@ This app is for one learner opening it when focus is low. The first screen shoul
 ## Today Page Rule
 
 - Show the next task card first.
-- Keep labels short and human: Today, Start here, Notes, Time.
+- Keep labels short and human: Today, To do, Done, Notes, Close the day.
 - Do not explain streak logic, carry-over logic, or behavior design on the main surface.
-- Put timer, time controls, strict mode, motivation tools, and psychology tricks behind one collapsed Tools section in the right rail.
+- Do not duplicate the first task in a separate spotlight card. The board/list cards are the work surface.
+- Do not show time controls on Today.
+- Put strict mode, motivation tools, and psychology tricks below the task board as separate Hard Mode helper cards.
 - Remove planning/reflection forms from Today unless they directly help finish the current card.
 
 ## Card Rule
