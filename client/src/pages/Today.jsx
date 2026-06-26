@@ -80,7 +80,7 @@ function DisciplineLaunch({
     <div className={`discipline-panel style-${pushStyle}`}>
       <div className="launch-top">
         <div>
-          <div className="eyebrow">Hard mode tools</div>
+          <div className="eyebrow">Start small</div>
           <h3>Make starting easier than quitting</h3>
           <p>
             Today's real minimum is one finished card. After that, the day has proof.
@@ -141,8 +141,8 @@ function HardModePanel({ enabled, onToggle, contract, onContract, firstTaskTitle
         </button>
       </div>
       <p className="muted">
-        Makes quitting slower than starting. If this is on, skipping asks for a reason,
-        a 20-second pause, and proof that you tried the tiny version first.
+        Use this on the days where your brain starts negotiating. Skipping asks for
+        a reason, a short pause, and proof that you tried the tiny version first.
       </p>
       <div className="hard-rule">
         <span>First move</span>
@@ -227,47 +227,6 @@ function CoachTools({ date, firstTaskTitle }) {
       </details>
 
       <Link className="note-link" to="/notes">Open notebook after a card</Link>
-    </div>
-  );
-}
-
-function ResourceScoutPanel({ pack, busy, onLoad }) {
-  const resources = pack?.resources || [];
-
-  return (
-    <div className="rail-panel resource-scout-panel">
-      <div className="label-row">
-        <h3>When bored</h3>
-        <span className="faint">real links</span>
-      </div>
-      <p className="muted">
-        If the card feels too heavy, open one related resource first. Five useful minutes still counts as starting.
-      </p>
-      <button className="btn sm primary" onClick={onLoad} disabled={busy}>
-        {busy ? 'Finding...' : 'Find links'}
-      </button>
-
-      {pack?.scout && (
-        <div className="scout-note">
-          <b>{pack.scout.topic}</b>
-          <p>{pack.scout.reason}</p>
-          <span>{pack.scout.tiny_action}</span>
-        </div>
-      )}
-
-      {resources.length ? (
-        <div className="resource-list">
-          {resources.map((item, index) => (
-            <a key={`${item.url}-${index}`} href={item.url} target="_blank" rel="noreferrer">
-              <span>{item.kind}</span>
-              <b>{item.title}</b>
-            </a>
-          ))}
-        </div>
-      ) : null}
-
-      {pack?.aiError && <p className="faint">AI was unavailable, so these came from the fallback resource map.</p>}
-      {pack?.sourceNote && <p className="faint">{pack.sourceNote}</p>}
     </div>
   );
 }
@@ -372,8 +331,6 @@ export default function Today() {
   const [entryTried, setEntryTried] = useState(false);
   const [draggingId, setDraggingId] = useState(null);
   const [boardView, setBoardView] = useState(() => localStorage.getItem('mentor-board-view') || 'board');
-  const [resourceBusy, setResourceBusy] = useState(false);
-  const [resourcePack, setResourcePack] = useState(null);
 
   useEffect(() => {
     localStorage.setItem('mentor-push-style', pushStyle);
@@ -471,19 +428,6 @@ export default function Today() {
       console.warn('[today] replan failed', e);
     }
     setBusy(false);
-  }
-
-  async function loadResourceScout() {
-    setResourceBusy(true);
-    setErr('');
-    try {
-      const out = await api.resourceScout({ date: day.the_date });
-      setResourcePack(out);
-    } catch (e) {
-      setErr(`Could not find resource links: ${e.message}`);
-    } finally {
-      setResourceBusy(false);
-    }
   }
 
   async function finishDay(status) {
@@ -597,9 +541,12 @@ export default function Today() {
               </div>
 
               <section className="hard-tools-section">
-                <div className="label-row">
-                  <h3>Hard mode tools</h3>
-                  <span className="faint">optional</span>
+                <div className="label-row hard-tools-head">
+                  <div>
+                    <h3>Hard mode</h3>
+                    <p className="faint">Optional tools for days where starting feels slippery.</p>
+                  </div>
+                  <Link className="btn sm ghost" to="/resources">Need links?</Link>
                 </div>
                 <div className="hard-tools-grid">
                   <DisciplineLaunch
@@ -620,7 +567,6 @@ export default function Today() {
                     firstTaskTitle={firstTaskTitle}
                   />
                   <CoachTools date={day.the_date} firstTaskTitle={firstTaskTitle} />
-                  <ResourceScoutPanel pack={resourcePack} busy={resourceBusy} onLoad={loadResourceScout} />
                 </div>
               </section>
             </section>

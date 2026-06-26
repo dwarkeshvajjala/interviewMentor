@@ -6,6 +6,7 @@ import Questions from './pages/Questions.jsx';
 import Speaking from './pages/Speaking.jsx';
 import Progress from './pages/Progress.jsx';
 import Notes from './pages/Notes.jsx';
+import Resources from './pages/Resources.jsx';
 import { api } from './api.js';
 
 const tabs = [
@@ -14,6 +15,7 @@ const tabs = [
   ['/questions', 'Questions'],
   ['/speaking', 'Speaking'],
   ['/notes', 'Notes'],
+  ['/resources', 'Resources'],
   ['/progress', 'Progress']
 ];
 
@@ -140,6 +142,7 @@ export default function App() {
             <Route path="/questions" element={<Questions />} />
             <Route path="/speaking" element={<Speaking />} />
             <Route path="/notes" element={<Notes />} />
+            <Route path="/resources" element={<Resources />} />
             <Route path="/progress" element={<Progress />} />
           </Routes>
         </div>
