@@ -29,3 +29,4 @@ This app is for one learner opening it when focus is low. The first screen shoul
 
 - Discipline tools should reduce friction to start, not create another task.
 - Hard Mode is opt-in. It can add skip friction, but it should stay hidden until needed.
+- The "When bored" helper can use AI to choose a task-related topic, but links must be real trusted docs, curated resources, or search result pages. Do not invent article or video URLs.

@@ -105,6 +105,51 @@ Set restudy true only if the note shows a real misunderstanding.`;
   catch { return { feedback: out.text, follow_up: '', restudy: false }; }
 }
 
+// Review one interview-bank answer and return practical next steps.
+export async function answerReview({ topic, question, myAnswer, seniorAnswer }) {
+  const sys = `${COACH_RULES}
+He is practicing one interview question. Review his answer like a senior interviewer who wants him to improve, not feel judged.
+Return ONLY JSON:
+{"summary":"2-3 direct sentences","strengths":["1-2 things he did well"],"gaps":["1-3 missing or incorrect points"],"better_answer":"a concise stronger answer in natural spoken language","next_rep":"one tiny practice instruction for the next attempt","confidence":"Weak|Medium|Strong"}
+Use "Weak" when the answer is mostly missing or wrong, "Medium" when the base idea is there but incomplete, and "Strong" only when it is interview-ready.
+If a senior/reference answer is provided, compare against it. If not, use your own technical judgment.`;
+
+  const user = `Topic: ${topic || 'unspecified'}
+Question: ${question}
+
+His answer:
+${myAnswer || '(empty)'}
+
+Senior/reference answer:
+${seniorAnswer || '(not provided)'}`;
+
+  const out = await chat([{ role: 'system', content: sys }, { role: 'user', content: user }], { json: true, maxTokens: 900 });
+  if (out.error) return out;
+  try { return JSON.parse(out.text); }
+  catch { return { summary: out.text, strengths: [], gaps: [], better_answer: '', next_rep: '', confidence: 'Medium' }; }
+}
+
+// Pick a useful resource direction when the learner is bored or stuck.
+export async function resourceScout({ weekLabel, focus, tasks }) {
+  const sys = `${COACH_RULES}
+He is bored, stuck, or not ready to do the task card directly.
+Pick one concrete topic from today's cards and create a search direction for real external resources.
+Do not invent links. The server will build trusted search URLs separately.
+Return ONLY JSON:
+{"topic":"short topic name","query":"specific search phrase, 4-8 words","reason":"one human sentence explaining why this is worth opening now","tiny_action":"one tiny action after opening a link"}`;
+
+  const user = `Week: ${weekLabel || 'unknown'}
+Focus: ${focus || 'unknown'}
+Today cards: ${JSON.stringify(tasks || [])}
+
+Choose the best resource direction for a low-energy browse session.`;
+
+  const out = await chat([{ role: 'system', content: sys }, { role: 'user', content: user }], { json: true, maxTokens: 500 });
+  if (out.error) return out;
+  try { return JSON.parse(out.text); }
+  catch { return { error: 'Could not parse AI response', raw: out.text }; }
+}
+
 // Generate a short mock interview for the current phase.
 export async function generateMock({ phase }) {
   const sys = `${COACH_RULES}

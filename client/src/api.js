@@ -40,6 +40,8 @@ export const api = {
   replan: (body) => req('/api/ai/replan', { method: 'POST', body }),
   sendNote: (body) => req('/api/ai/note', { method: 'POST', body }),
   getNotes: () => req('/api/ai/notes'),
+  reviewAnswer: (body) => req('/api/ai/answer-review', { method: 'POST', body }),
+  resourceScout: (body) => req('/api/ai/resource-scout', { method: 'POST', body }),
   mock: (body) => req('/api/ai/mock', { method: 'POST', body }),
 
   // data

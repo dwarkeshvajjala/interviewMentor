@@ -11,6 +11,39 @@ const CONF_COLOR = {
   '🤔 Medium': '#f4b95b',
   '💪 Strong': '#5fd0a5',
 };
+function ReviewCard({ review }) {
+  if (!review) return null;
+
+  return (
+    <div className="answer-review-box">
+      <div className="who">AI review</div>
+      {review.summary && <p>{review.summary}</p>}
+
+      {Array.isArray(review.strengths) && review.strengths.length ? (
+        <div className="review-section good">
+          <b>Good</b>
+          <ul>{review.strengths.slice(0, 2).map((x, i) => <li key={i}>{x}</li>)}</ul>
+        </div>
+      ) : null}
+
+      {Array.isArray(review.gaps) && review.gaps.length ? (
+        <div className="review-section gap">
+          <b>Gaps</b>
+          <ul>{review.gaps.slice(0, 3).map((x, i) => <li key={i}>{x}</li>)}</ul>
+        </div>
+      ) : null}
+
+      {review.better_answer && (
+        <div className="review-section">
+          <b>Better answer</b>
+          <p>{review.better_answer}</p>
+        </div>
+      )}
+
+      {review.next_rep && <div className="follow">Next rep: {review.next_rep}</div>}
+    </div>
+  );
+}
 
 export default function Questions() {
   const [items, setItems]     = useState([]);
@@ -21,6 +54,8 @@ export default function Questions() {
   const [answers, setAnswers] = useState({});   // { [id]: { my_answer, senior_answer } }
   const [topicFilter, setTopicFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [reviewBusy, setReviewBusy] = useState(null);
+  const [reviews, setReviews] = useState({});
 
   async function load() {
     try {
@@ -63,6 +98,43 @@ export default function Questions() {
       });
       load();
     } catch (e) { setErr(e.message); }
+  }
+
+  async function reviewAnswer(q) {
+    const ans = answers[q.id] || {};
+    const myAnswer = ans.my_answer ?? q.my_answer ?? '';
+    const seniorAnswer = ans.senior_answer ?? q.senior_answer ?? '';
+    if (!myAnswer.trim()) {
+      setErr('Write your answer first, then ask AI to review it.');
+      return;
+    }
+
+    setReviewBusy(q.id);
+    setErr('');
+    try {
+      const out = await api.reviewAnswer({
+        id: q.id,
+        topic: q.topic,
+        question: q.question,
+        my_answer: myAnswer,
+        senior_answer: seniorAnswer
+      });
+      if (out.review) setReviews(prev => ({ ...prev, [q.id]: out.review }));
+      if (out.item) {
+        setItems(prev => prev.map(item => item.id === q.id ? out.item : item));
+        setAnswers(prev => ({
+          ...prev,
+          [q.id]: {
+            my_answer: out.item.my_answer ?? '',
+            senior_answer: out.item.senior_answer ?? ''
+          }
+        }));
+      }
+    } catch (e) {
+      setErr(`AI review failed: ${e.message}`);
+    } finally {
+      setReviewBusy(null);
+    }
   }
 
   async function del(id) {
@@ -229,12 +301,18 @@ export default function Questions() {
                 />
               </label>
               {q.mistake && (
-                <div style={{ marginBottom: 10, padding: '8px 10px', background: 'rgba(251,139,139,0.07)', borderRadius: 7, border: '1px solid rgba(251,139,139,0.25)' }}>
-                  <span className="faint" style={{ fontSize: 11.5 }}>Last mistake: </span>
+                <div style={{ marginBottom: 10, padding: '8px 10px', background: 'rgba(251,139,139,0.07)', borderRadius: 7, border: '1px solid rgba(251,139,139,0.25)', whiteSpace: 'pre-wrap' }}>
+                  <span className="faint" style={{ fontSize: 11.5 }}>Last AI review: </span>
                   <span className="muted" style={{ fontSize: 13 }}>{q.mistake}</span>
                 </div>
               )}
-              <button className="btn sm sage" onClick={() => saveAnswers(q)}>Save</button>
+              <ReviewCard review={reviews[q.id]} />
+              <div className="row">
+                <button className="btn sm sage" onClick={() => saveAnswers(q)}>Save</button>
+                <button className="btn sm primary" onClick={() => reviewAnswer(q)} disabled={reviewBusy === q.id}>
+                  {reviewBusy === q.id ? 'Reviewing...' : 'AI review'}
+                </button>
+              </div>
             </div>
           )}
         </div>

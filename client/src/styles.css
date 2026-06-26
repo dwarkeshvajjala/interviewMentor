@@ -548,6 +548,51 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
 .ai-box .who { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); font-weight: 600; margin-bottom: 6px; }
 .ai-box .follow { color: var(--muted); margin-top: 8px; font-style: italic; }
 .restudy { color: var(--speak); font-weight: 600; }
+.answer-review-box {
+  border: 1px solid rgba(98,199,245,0.28);
+  border-radius: var(--radius-sm);
+  background: rgba(98,199,245,0.06);
+  padding: 12px;
+  margin: 0 0 10px;
+}
+.answer-review-box .who {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--code);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.answer-review-box p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+.review-section {
+  border-top: 1px solid var(--border-soft);
+  margin-top: 10px;
+  padding-top: 9px;
+}
+.review-section b {
+  display: block;
+  font-size: 12.5px;
+  margin-bottom: 4px;
+}
+.review-section.good b { color: var(--sage); }
+.review-section.gap b { color: var(--speak); }
+.review-section ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+.answer-review-box .follow {
+  border-top: 1px solid var(--border-soft);
+  color: var(--amber);
+  font-size: 13px;
+  margin-top: 10px;
+  padding-top: 9px;
+}
 
 /* ---------- tables / lists ---------- */
 .list-item {
@@ -958,7 +1003,7 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
 }
 .hard-tools-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
 }
 .hard-tools-grid > .rail-panel,
@@ -973,6 +1018,63 @@ label.field { display: block; font-size: 12.5px; color: var(--muted); margin: 0 
 }
 .hard-tools-grid .finish-meter {
   display: none;
+}
+.resource-scout-panel {
+  display: grid;
+  gap: 10px;
+}
+.resource-scout-panel p {
+  margin: 0;
+}
+.scout-note {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--panel-wash);
+  padding: 10px;
+}
+.scout-note b {
+  display: block;
+  font-family: var(--display);
+  font-size: 14px;
+}
+.scout-note p {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+.scout-note span {
+  display: block;
+  color: var(--amber);
+  font-size: 12.5px;
+  margin-top: 7px;
+}
+.resource-list {
+  display: grid;
+  gap: 8px;
+}
+.resource-list a {
+  display: grid;
+  gap: 2px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  padding: 9px 10px;
+  text-decoration: none;
+}
+.resource-list a:hover {
+  border-color: var(--code);
+}
+.resource-list span {
+  color: var(--code);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.resource-list b {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
 }
 .jira-board {
   display: grid;
