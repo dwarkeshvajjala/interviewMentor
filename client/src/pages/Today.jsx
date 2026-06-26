@@ -5,6 +5,7 @@ import { ErrorState, InlineNotice, LoadingState } from '../components/States.jsx
 import { getDailyCoachLine, getDailyEdge, getTimeGreeting } from '../motivation.js';
 
 const MODES = [['full', 'Full - 2h'], ['normal', 'Normal - 90m'], ['low', 'Low - 20m']];
+const TOOL_TABS = [['timer', 'Timer'], ['time', 'Time'], ['hard', 'Hard mode']];
 const DEFAULT_PACT = {
   wish: 'Become interview-ready and open better career options.',
   outcome: 'More confidence, better conversations, and a calmer path forward.',
@@ -343,9 +344,13 @@ function CoachTools({ date, firstTaskTitle }) {
   );
 }
 
-function TaskCard({ task, onMove, index }) {
+function TaskCard({ task, onMove, index, onDragStart }) {
   return (
-    <div className={`kanban-task ${task.done ? 'done' : ''}`}>
+    <div
+      className={`kanban-task ${task.done ? 'done' : ''}`}
+      draggable
+      onDragStart={() => onDragStart(task.id)}
+    >
       <div className="task-head">
         <span className="task-number">{task.done ? 'Done' : `Card ${index + 1}`}</span>
         {task.minutes ? <span className="min">{task.minutes} min</span> : null}
@@ -360,13 +365,160 @@ function TaskCard({ task, onMove, index }) {
   );
 }
 
-function TaskStack({ tasks, onMove }) {
+function TaskBoard({ todoTasks, doneTasks, onMove, onDragStart, onDrop }) {
+  const columns = [
+    { key: 'todo', title: 'To do', done: false, tasks: todoTasks },
+    { key: 'done', title: 'Done', done: true, tasks: doneTasks }
+  ];
+
   return (
-    <div className="simple-task-stack">
-      {tasks.map((task, index) => (
-        <TaskCard key={task.id} task={task} index={index} onMove={onMove} />
+    <div className="jira-board">
+      {columns.map(column => (
+        <section
+          key={column.key}
+          className={`jira-column ${column.done ? 'done-column' : ''}`}
+          onDragOver={e => e.preventDefault()}
+          onDrop={() => onDrop(column.done)}
+        >
+          <div className="jira-column-head">
+            <h3>{column.title}</h3>
+            <span>{column.tasks.length}</span>
+          </div>
+          <div className="jira-list">
+            {column.tasks.length ? column.tasks.map((task, index) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                index={index}
+                onMove={onMove}
+                onDragStart={onDragStart}
+              />
+            )) : (
+              <div className="empty-drop">Drop cards here</div>
+            )}
+          </div>
+        </section>
       ))}
     </div>
+  );
+}
+
+function TaskListView({ tasks, onMove }) {
+  return (
+    <div className="jira-list-view">
+      {tasks.map((task, index) => (
+        <div key={task.id} className={`task-row ${task.done ? 'done' : ''}`}>
+          <span className="task-status">{task.done ? 'Done' : `Card ${index + 1}`}</span>
+          <div className="task-row-main">
+            <div className="task-title">{task.title}</div>
+            <p className="task-detail">{task.detail}</p>
+            {task.resource_url ? <a href={task.resource_url} target="_blank" rel="noreferrer">open resource</a> : null}
+          </div>
+          <button className="btn sm ghost" onClick={() => onMove(task.id)}>{task.done ? 'Undo' : 'Done'}</button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function HomeTools({
+  date,
+  mode,
+  remainingCount,
+  dayMode,
+  onMode,
+  energy,
+  mood,
+  onScale,
+  hardMode,
+  onHardMode,
+  hardContract,
+  onHardContract,
+  doneCount,
+  totalTasks,
+  firstTaskTitle,
+  pushStyle,
+  onPushStyle,
+  reward,
+  onReward
+}) {
+  const [activeTool, setActiveTool] = useState('timer');
+
+  return (
+    <details className="home-tools">
+      <summary>Tools</summary>
+      <div className="tool-content">
+        <div className="tool-picker">
+          {TOOL_TABS.map(([key, label]) => (
+            <button
+              key={key}
+              className={`chip ${activeTool === key ? 'on' : ''}`}
+              onClick={() => setActiveTool(key)}
+              type="button"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {activeTool === 'timer' && (
+          <div className="tool-pane">
+            <FocusSprint date={date} mode={mode} />
+          </div>
+        )}
+
+        {activeTool === 'time' && (
+          <div className="tool-pane">
+            <div className="notes-tool">
+              <div className="label-row"><h3>Time</h3><span className="faint">{remainingCount} left</span></div>
+              <div className="row">
+                {MODES.map(([m, label]) => (
+                  <button key={m} className={`chip ${dayMode === m ? 'on' : ''}`} onClick={() => onMode(m)}>{label}</button>
+                ))}
+              </div>
+              <details className="inside-details compact">
+                <summary>Check-in</summary>
+                <div className="scale-row">
+                  <span>Energy</span>
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <button key={n} className={`chip scale ${energy === n ? 'on' : ''}`} onClick={() => onScale('energy', n)}>{n}</button>
+                  ))}
+                </div>
+                <div className="scale-row">
+                  <span>Mood</span>
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <button key={n} className={`chip scale ${mood === n ? 'on' : ''}`} onClick={() => onScale('mood', n)}>{n}</button>
+                  ))}
+                </div>
+              </details>
+            </div>
+          </div>
+        )}
+
+        {activeTool === 'hard' && (
+          <div className="tool-pane hard-tool-stack">
+            <DisciplineLaunch
+              doneCount={doneCount}
+              totalTasks={totalTasks}
+              remainingCount={remainingCount}
+              firstTaskTitle={firstTaskTitle}
+              pushStyle={pushStyle}
+              onPushStyle={onPushStyle}
+              reward={reward}
+              onReward={onReward}
+            />
+            <HardModePanel
+              enabled={hardMode}
+              onToggle={onHardMode}
+              contract={hardContract}
+              onContract={onHardContract}
+              firstTaskTitle={firstTaskTitle}
+            />
+            <CoachTools date={date} firstTaskTitle={firstTaskTitle} />
+          </div>
+        )}
+      </div>
+    </details>
   );
 }
 
@@ -391,6 +543,8 @@ export default function Today() {
   const [skipSeconds, setSkipSeconds] = useState(0);
   const [skipReason, setSkipReason] = useState('');
   const [entryTried, setEntryTried] = useState(false);
+  const [draggingId, setDraggingId] = useState(null);
+  const [boardView, setBoardView] = useState(() => localStorage.getItem('mentor-board-view') || 'board');
 
   const [energy, setEnergy] = useState(null);
   const [mood, setMood] = useState(null);
@@ -410,6 +564,10 @@ export default function Today() {
   useEffect(() => {
     localStorage.setItem('mentor-hard-contract', hardContract);
   }, [hardContract]);
+
+  useEffect(() => {
+    localStorage.setItem('mentor-board-view', boardView);
+  }, [boardView]);
 
   useEffect(() => {
     if (!skipArmed || skipSeconds <= 0) return undefined;
@@ -465,6 +623,14 @@ export default function Today() {
       setErr(e.message);
       load();
     }
+  }
+
+  function dropTask(done) {
+    if (!draggingId) return;
+    const draggedTask = tasks.find(t => t.id === draggingId);
+    setDraggingId(null);
+    if (!draggedTask || draggedTask.done === done) return;
+    toggle(draggingId);
   }
 
   async function chooseMode(m) {
@@ -590,6 +756,10 @@ export default function Today() {
                   <p className="muted">Do the first card. That is enough to make today real.</p>
                 </div>
                 <div className="board-controls">
+                  <div className="segmented" aria-label="Task view">
+                    <button className={boardView === 'board' ? 'on' : ''} onClick={() => setBoardView('board')}>Board</button>
+                    <button className={boardView === 'list' ? 'on' : ''} onClick={() => setBoardView('list')}>List</button>
+                  </div>
                   <button className="btn sm ghost" onClick={replan} disabled={busy}>{busy ? 'Updating...' : 'Adjust cards'}</button>
                 </div>
               </div>
@@ -598,76 +768,33 @@ export default function Today() {
 
               <NextCardSpotlight task={nextTask} doneCount={doneCount} totalTasks={tasks.length} onMove={toggle} />
 
-              <TaskStack tasks={[...todoTasks, ...doneTasks]} onMove={toggle} />
+              {boardView === 'board' ? (
+                <TaskBoard
+                  todoTasks={todoTasks}
+                  doneTasks={doneTasks}
+                  onMove={toggle}
+                  onDragStart={setDraggingId}
+                  onDrop={dropTask}
+                />
+              ) : (
+                <TaskListView tasks={[...todoTasks, ...doneTasks]} onMove={toggle} />
+              )}
 
               <div className={`coach-strip ${coachLine.tone}`}>
                 <span>{coachLine.tag}</span>
                 <p>{coachLine.text}</p>
               </div>
-
-              <details className="discipline-drawer">
-                <summary>Hard mode and motivation tools</summary>
-                <DisciplineLaunch
-                  doneCount={doneCount}
-                  totalTasks={tasks.length}
-                  remainingCount={remainingCount}
-                  firstTaskTitle={firstTaskTitle}
-                  pushStyle={pushStyle}
-                  onPushStyle={setPushStyle}
-                  reward={reward}
-                  onReward={setReward}
-                />
-                <HardModePanel
-                  enabled={hardMode}
-                  onToggle={setHardMode}
-                  contract={hardContract}
-                  onContract={setHardContract}
-                  firstTaskTitle={firstTaskTitle}
-                />
-                <CoachTools date={day.the_date} firstTaskTitle={firstTaskTitle} />
-              </details>
-            </section>
-
-            <section className="notes-cta-panel">
-              <div>
-                <div className="label-row">
-                  <h3>Notes</h3>
-                </div>
-                <p className="muted">
-                  Paste rough learning notes after a card. Keep the work page clean.
-                </p>
-              </div>
-              <Link className="btn primary sm" to="/notes">Open notebook</Link>
             </section>
           </main>
 
           <aside className="today-rail">
-            <div className="rail-panel">
-              <div className="label-row"><h3>Time</h3><span className="faint">{remainingCount} left</span></div>
-              <div className="row">
-                {MODES.map(([m, label]) => (
-                  <button key={m} className={`chip ${day.mode === m ? 'on' : ''}`} onClick={() => chooseMode(m)}>{label}</button>
-                ))}
+            <div className="note-panel notes-tool">
+              <div>
+                <div className="label-row"><h3>Notes</h3></div>
+                <p className="muted">Paste rough learning notes after a card.</p>
               </div>
-
-              <details className="inside-details compact">
-                <summary>Check-in</summary>
-                <div className="scale-row">
-                  <span>Energy</span>
-                  {[1, 2, 3, 4, 5].map(n => (
-                    <button key={n} className={`chip scale ${energy === n ? 'on' : ''}`} onClick={() => setScale('energy', n)}>{n}</button>
-                  ))}
-                </div>
-                <div className="scale-row">
-                  <span>Mood</span>
-                  {[1, 2, 3, 4, 5].map(n => (
-                    <button key={n} className={`chip scale ${mood === n ? 'on' : ''}`} onClick={() => setScale('mood', n)}>{n}</button>
-                  ))}
-                </div>
-              </details>
+              <Link className="btn primary sm" to="/notes">Open notebook</Link>
             </div>
-
-            <FocusSprint date={day.the_date} mode={day.mode} />
 
             <div className="rail-panel close-panel">
               <div className="label-row"><h3>Close the day</h3></div>
@@ -704,6 +831,28 @@ export default function Today() {
               )}
               <Chain series={progress?.series || []} />
             </div>
+
+            <HomeTools
+              date={day.the_date}
+              mode={day.mode}
+              remainingCount={remainingCount}
+              dayMode={day.mode}
+              onMode={chooseMode}
+              energy={energy}
+              mood={mood}
+              onScale={setScale}
+              hardMode={hardMode}
+              onHardMode={setHardMode}
+              hardContract={hardContract}
+              onHardContract={setHardContract}
+              doneCount={doneCount}
+              totalTasks={tasks.length}
+              firstTaskTitle={firstTaskTitle}
+              pushStyle={pushStyle}
+              onPushStyle={setPushStyle}
+              reward={reward}
+              onReward={setReward}
+            />
           </aside>
         </div>
       )}
